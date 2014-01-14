@@ -19,6 +19,7 @@ menuOptions = [
       { label: "subOption1", options: [
         { label: "subSubOption2", action: someFunction1 },
         { label: "subSubOption3", action: someFunction2 },
+        {}, // separator
         { label: "subSubOption4", action: someFunction3 }
       ] },
       { label: "subOption2", action: function(){} },

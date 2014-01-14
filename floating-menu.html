@@ -15,7 +15,7 @@
   <template>
     <link href="floating-menu.css" rel="stylesheet" type="text/css">
       <template repeat="{{options}}" id="root">
-        <floating-menu-item label="{{label}}">
+        <floating-menu-item label="{{label}}" action="{{action}}">
           <div id="submenu" class="{{options != undefined}}">
             <template ref="root" repeat="{{options}}"></template>
           </div>
@@ -26,6 +26,9 @@
     (function() {
 
       var vail = document.createElement('floating-menu-vail')
+      var dist = function(x1, y1, x2, y2) {  
+        return Math.sqrt( Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) );
+      }
 
       Polymer('floating-menu', {
         ready: function() {
@@ -48,8 +51,9 @@
           }, false)
 
           this.parent.addEventListener('pointerup', function(event){
-            var isRightClick = (event.pointerId == 1 && event.button == 2)
-            var isTap = (event.pointerId == 2 && x == event.clientX && y == event.clientY)
+            var d = dist(x, y, event.clientX, event.clientY)
+            var isRightClick = (event.pointerId == 1 && event.button == 2 && d < 5)
+            var isTap = (event.pointerId == 2 && d < 5)
             if (isRightClick || isTap) {
               scope.visible = true
               scope.style.top = event.clientY - 8 + "px"
@@ -73,7 +77,7 @@
           vail.addEventListener('pointerover', function(event){
             closeTimeout = setTimeout(function(){
               scope.visible = false
-            }, 200)
+            }, 500)
           }, false)
           window.addEventListener('scroll', function(event){
             scope.visible = false
@@ -89,6 +93,9 @@
           this.addEventListener('pointerup', function(event){
             event.stopPropagation()
           }, false)
+          this.addEventListener('floating-menu-item-clicked', function(event){
+            scope.visible = false
+          }, false)
 
         },
 
@@ -102,18 +109,24 @@
   </script>
 </polymer-element>
 
-<polymer-element name="floating-menu-item" attributes="label">
+<polymer-element name="floating-menu-item" attributes="label action">
 <template>
   <link href="floating-menu.css" rel="stylesheet" type="text/css">
   {{label}}<content></content>
 </template>
 <script>
   Polymer('floating-menu-item', {
+    label: '',
     ready: function() {
-      var scope = this
       this.setAttribute('touch-action', 'none')
       this.classList.add('floating-menu-item')
+      this.classList.add('empty')
+    },
+    labelChanged: function() {
 
+      var scope = this
+
+      this.classList.remove('empty')
       //clipping
       this.addEventListener('pointerover', function(event) {
         event.stopPropagation();
@@ -137,6 +150,15 @@
           }
         }        
 
+      }, false)
+
+    },
+    actionChanged: function() {
+      var scope = this
+      this.addEventListener('pointerup', function(event) {
+        event.stopPropagation()
+        scope.action()
+        scope.fire('floating-menu-item-clicked', scope)
       }, false)
     }
   })
