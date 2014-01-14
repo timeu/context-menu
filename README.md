@@ -1,7 +1,9 @@
 floating-menu
 =============
 
-Polymer.js custom element for a floating menu with a simple API.
+Floating menu custom element with a simple API.
+
+Made for [polymer.js](http://www.polymer-project.org/)
 
 ![floating menu](https://raw.github.com/arodic/floating-menu/doc/floating-menu-screen-capture.gif)
 
