@@ -11,7 +11,7 @@ use
 ===
 ```<floating-menu parent="{{parentElement}}" options="{{menuOptions}}"></floating-menu>```
 
-**parentElement** (optional) dom element to attach the menu to. If undefined, will attach to body.
+**parentElement** (optional) dom element to append the menu to. If `undefined`, the menu will be appended to `document.body`.
 
 **options** menu options for the element defined by following syntax:
 
