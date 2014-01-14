@@ -1,0 +1,141 @@
+<polymer-element name="floating-menu-vail">
+  <link href="floating-menu.css" rel="stylesheet" type="text/css">
+  <template></template>
+  <script>
+    Polymer('floating-menu-vail', {
+      ready: function() {
+        this.setAttribute('touch-action', 'none')
+        this.classList.add('floating-menu-vail')
+      }
+    })
+  </script>
+</polymer-element>
+
+<polymer-element name="floating-menu" attributes="parent options">
+  <template>
+    <link href="floating-menu.css" rel="stylesheet" type="text/css">
+      <template repeat="{{options}}" id="root">
+        <floating-menu-item label="{{label}}">
+          <div id="submenu" class="{{options != undefined}}">
+            <template ref="root" repeat="{{options}}"></template>
+          </div>
+        </floating-menu-item>
+      </template>
+  </template>
+  <script>
+    (function() {
+
+      var vail = document.createElement('floating-menu-vail')
+
+      Polymer('floating-menu', {
+        parentChanged: function() {
+
+          var scope = this
+          this.setAttribute('touch-action', 'none')
+          this.classList.add('floating-menu')
+          document.body.appendChild(vail)
+
+          var closeTimeout;
+
+          var x, y
+
+          this.parent.addEventListener('pointerdown', function(event){
+            x = event.clientX
+            y = event.clientY
+          }, false)
+
+          this.parent.addEventListener('pointerup', function(event){
+            var isRightClick = (event.pointerId == 1 && event.button == 2)
+            var isTap = (event.pointerId == 2 && x == event.clientX && y == event.clientY)
+            if (isRightClick || isTap) {
+              scope.visible = true
+              scope.style.top = event.clientY - 8 + "px"
+              scope.style.left = event.clientX - 8 + "px"
+
+              // clipping
+              var rect = scope.getBoundingClientRect()
+              var bottomDist = (rect.bottom+16) - window.innerHeight 
+              if (bottomDist > 0){
+                scope.style.top = window.innerHeight - rect.height - 16 + 'px'
+              }
+              var rightDist = (rect.right+16) - window.innerWidth 
+              if (rightDist > 0){
+                scope.style.left = window.innerWidth - rect.width - 16 + 'px'
+              }
+              Platform.flush()
+
+            }
+          }, false)
+
+          vail.addEventListener('pointerover', function(event){
+            closeTimeout = setTimeout(function(){
+              scope.visible = false
+            }, 200)
+          }, false)
+          window.addEventListener('scroll', function(event){
+            scope.visible = false
+          }, false)
+
+          this.addEventListener('pointerdown', function(event){
+            event.stopPropagation()
+          }, false)
+          this.addEventListener('pointermove', function(event){
+            event.stopPropagation();
+            clearTimeout(closeTimeout)
+          }, false)
+          this.addEventListener('pointerup', function(event){
+            event.stopPropagation()
+          }, false)
+
+        },
+
+        visibleChanged: function() {
+          this.classList.toggle('visible', this.visible)
+          vail.classList.toggle('visible', this.visible)
+        }
+      })
+
+    }())
+  </script>
+</polymer-element>
+
+<polymer-element name="floating-menu-item" attributes="label">
+<template>
+  <link href="floating-menu.css" rel="stylesheet" type="text/css">
+  {{label}}<content></content>
+</template>
+<script>
+  Polymer('floating-menu-item', {
+    ready: function() {
+      var scope = this
+      this.setAttribute('touch-action', 'none')
+      this.classList.add('floating-menu-item')
+
+      //clipping
+      this.addEventListener('pointerover', function(event) {
+        event.stopPropagation();
+        for (var i in scope.childNodes){
+          var childNode = scope.childNodes[i]
+          if (childNode.id == 'submenu') {
+            childNode.style.top = '0'
+            var rect = childNode.getBoundingClientRect()
+            var bottomDist = (rect.bottom+16) - window.innerHeight 
+            if (bottomDist > 0){
+              childNode.style.top = - bottomDist + 'px'
+            } else {
+              childNode.style.top = '0'
+            }
+            // var rightDist = (rect.right+16) - window.innerWidth 
+            // if (rightDist > 0){
+            //   childNode.style.left = "calc(100% - " + rightDist + "px)"
+            // } else {
+            //   childNode.style.left = '100%'
+            // }
+          }
+        }        
+
+      }, false)
+    }
+  })
+</script>
+</polymer-element>
