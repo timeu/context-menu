@@ -28,13 +28,16 @@
       var vail = document.createElement('floating-menu-vail')
 
       Polymer('floating-menu', {
-        parentChanged: function() {
-
-          var scope = this
+        ready: function() {
           this.setAttribute('touch-action', 'none')
           this.classList.add('floating-menu')
           document.body.appendChild(vail)
+          document.body.setAttribute( 'oncontextmenu', 'return false')
+          if (!this.parent) this.parent = document.body;
+        },
+        parentChanged: function() {
 
+          var scope = this
           var closeTimeout;
 
           var x, y
