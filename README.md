@@ -1,14 +1,13 @@
 floating-menu
 =============
+![floating menu](https://raw.github.com/arodic/floating-menu/doc/floating-menu-screen-capture.gif)
 
 Floating menu custom element with a simple API. Designed and polished for simple user experience on both desktop and mobile.
 
 Requires [polymer.js](http://www.polymer-project.org/)
 
-![floating menu](https://raw.github.com/arodic/floating-menu/doc/floating-menu-screen-capture.gif)
-
-use
-===
+Use
+---
 ```<floating-menu parent="{{parentElement}}" options="{{menuOptions}}"></floating-menu>```
 
 **parentElement** (optional) dom element to append the menu to. If `undefined`, the menu will be appended to `document.body`.
@@ -28,3 +27,14 @@ menuOptions = [
   ] }
 ]
 ```
+
+Features
+--------
+- Simple API
+- Touch support
+- Smart hover-handling (requires less user precision)
+- Window edge detection (menu position adjusted when too close to the edge)
+
+Motivation
+----------
+Floating menus are very simple to make with just a bit of HTML, JavaScript and CSS. However, most implementations don't work quite right when it comes to touch support, and user experience can be quite bad if a user has limited screen space or clumsy hands. In this implementation, I attempted to correct some of those problems and and package it in a user-friendly and developer-friendly component.

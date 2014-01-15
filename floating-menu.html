@@ -16,7 +16,7 @@
     <link href="floating-menu.css" rel="stylesheet" type="text/css">
       <template repeat="{{options}}" id="root">
         <floating-menu-item label="{{label}}" action="{{action}}">
-          <div id="submenu" class="{{options != undefined}}">
+          <div id="submenu" class="{{options == undefined ? 'empty' : 'not-empty'}}">
             <template ref="root" repeat="{{options}}"></template>
           </div>
         </floating-menu-item>
@@ -43,7 +43,7 @@
           var scope = this
           var closeTimeout;
 
-          var x, y
+          var x = 0, y = 0, d = 0;
 
           this.parent.addEventListener('pointerdown', function(event){
             x = event.clientX
@@ -97,11 +97,50 @@
             scope.visible = false
           }, false)
 
+          this.addEventListener('pointermove', function(event){
+            event.stopPropagation()
+            var newD = Math.abs(event.clientY - y) - Math.max(0, event.clientX - x)      
+            if (newD < 0) d = newD
+            else d = (d + newD) / 2
+            x = event.clientX
+            y = event.clientY
+          }, false)
+
+          var expandTimeout = {};
+          this.addEventListener('submenu-expanded', function(event){
+            clearTimeout(expandTimeout)
+            if (d >= 0 || expandTimeout.cleared) {
+              expandSubmenu(event.detail)
+            } else {
+              expandTimeout.cleared = false;
+              expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 1000) 
+            }
+          }, false)
+
+          var expandSubmenu = function(node) {
+            node.expanded = true
+            var s = node.parentNode.childNodes
+            for (var i = 0; i < s.length; i++ ){
+              if (s[i].nodeName == "FLOATING-MENU-ITEM" && s[i] != node) {
+                s[i].expanded = false
+              }
+            }
+            expandTimeout.cleared = true;
+          }
+
         },
 
         visibleChanged: function() {
           this.classList.toggle('visible', this.visible)
           vail.classList.toggle('visible', this.visible)
+          if (!this.visible) {
+            var c = this.shadowRoot.childNodes
+            for (var i = 0; i < c.length; i++ ){
+              if (c[i].nodeName == "FLOATING-MENU-ITEM") {
+                c[i].expanded = false
+              }
+            }            
+          }
         }
       })
 
@@ -127,28 +166,10 @@
       var scope = this
 
       this.classList.remove('empty')
-      //clipping
       this.addEventListener('pointerover', function(event) {
-        event.stopPropagation();
-        for (var i in scope.childNodes){
-          var childNode = scope.childNodes[i]
-          if (childNode.id == 'submenu') {
-            childNode.style.top = '0'
-            var rect = childNode.getBoundingClientRect()
-            var bottomDist = (rect.bottom+16) - window.innerHeight 
-            if (bottomDist > 0){
-              childNode.style.top = - bottomDist + 'px'
-            } else {
-              childNode.style.top = '0'
-            }
-            // var rightDist = (rect.right+16) - window.innerWidth 
-            // if (rightDist > 0){
-            //   childNode.style.left = "calc(100% - " + rightDist + "px)"
-            // } else {
-            //   childNode.style.left = '100%'
-            // }
-          }
-        }        
+        
+        this.fire('submenu-expanded', scope)
+        event.stopPropagation();  
 
       }, false)
 
@@ -160,6 +181,30 @@
         scope.action()
         scope.fire('floating-menu-item-clicked', scope)
       }, false)
+    },
+    expandedChanged: function() {
+      this.classList.toggle('expanded', this.expanded)
+      var submenu = this.childNodes[1];  // TODO make less ugly. [1] <- submenu
+      
+      var c = submenu.childNodes
+      for (var i = 0; i < c.length; i++ ){
+        if (c[i].nodeName == "FLOATING-MENU-ITEM") {
+          c[i].expanded = false
+        }
+      }
+
+      //clipping
+      if (this.expanded) {
+        submenu.style.top = '0'
+        var rect = submenu.getBoundingClientRect()
+        var bottomDist = (rect.bottom+16) - window.innerHeight 
+        if (bottomDist > 0){
+          submenu.style.top = - bottomDist + 'px'
+        } else {
+          submenu.style.top = '0'
+        } 
+      }
+
     }
   })
 </script>
