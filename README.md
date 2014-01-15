@@ -8,11 +8,11 @@ Requires [polymer.js](http://www.polymer-project.org/)
 
 Use
 ---
-```<floating-menu parent="{{parentElement}}" options="{{menuOptions}}"></floating-menu>```
+```<floating-menu parent="{{}}" options="{{menuOptions}}"></floating-menu>```
 
-**parentElement** (optional) dom element to append the menu to. If `undefined`, the menu will be appended to `document.body`.
+**parent** (optional) dom element to append the menu to. If `undefined`, the menu will be appended to `document.body`.
 
-**options** menu options for the element defined by following syntax:
+**options** options for the menu. Example:
 
 ```
 menuOptions = [
