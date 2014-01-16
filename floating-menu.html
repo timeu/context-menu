@@ -59,7 +59,7 @@
           this.parent.addEventListener('pointerup', function(event){
             event.preventDefault()
             var l = dist(x, y, event.clientX, event.clientY)
-            var isRightClick = (event.pointerId == 1 && event.button == 2 && l < 5)
+            var isRightClick = (event.pointerId == 1 && (event.button == 2 || event.ctrlKey) && l < 5)
             var isTap = (event.pointerId > 1 && l < 5)
 
             if (isRightClick || isTap) {
