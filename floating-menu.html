@@ -6,6 +6,9 @@
       ready: function() {
         this.setAttribute('touch-action', 'none')
         this.classList.add('floating-menu-vail')
+      },
+      visibleChanged: function() {
+        this.classList.toggle('visible', this.visible)
       }
     })
   </script>
@@ -14,7 +17,7 @@
 <polymer-element name="floating-menu" attributes="parent options">
   <template>
     <link href="floating-menu.css" rel="stylesheet" type="text/css">
-    <floating-submenu id="mainmenu" expanded="true">
+    <floating-submenu id="mainmenu">
       <template repeat="{{options}}" id="root">
         <floating-menu-item id="item" label="{{label}}" action="{{action}}">
           <floating-submenu ref="item" empty="{{options == undefined}}">
@@ -48,35 +51,55 @@
           var x = 0, y = 0, d = 0
 
           this.parent.addEventListener('pointerdown', function(event){
+            event.preventDefault()
             x = event.clientX
             y = event.clientY
           }, false)
 
           this.parent.addEventListener('pointerup', function(event){
-            var d = dist(x, y, event.clientX, event.clientY)
-            var isRightClick = (event.pointerId == 1 && event.button == 2 && d < 5)
-            var isTap = (event.pointerId == 2 && d < 5)
+            event.preventDefault()
+            var l = dist(x, y, event.clientX, event.clientY)
+            var isRightClick = (event.pointerId == 1 && event.button == 2 && l < 5)
+            var isTap = (event.pointerId > 1 && l < 5)
+
             if (isRightClick || isTap) {
               scope.visible = true
               scope.style.top = event.clientY - 8 + "px"
               scope.style.left = event.clientX - 8 + "px"
+              clearTimeout(closeTimeout)
             }
           }, false)
 
           this.addEventListener('pointermove', function(event){
+            // console.log(event)
             event.stopPropagation()
-            var newD = Math.abs(event.clientY - y) -(event.clientX - x)
+            var newD = Math.abs(event.pageY - y) -(event.pageX - x)
             d = (d*2 + newD) / 3
-            x = event.clientX
-            y = event.clientY
+            x = event.pageX
+            y = event.pageY
             clearTimeout(closeTimeout)
           }, false)
 
           vail.addEventListener('pointerover', function(event){
+            event.stopPropagation()
             closeTimeout = setTimeout(function(){
               scope.visible = false
             }, 500)
           }, false)
+          vail.addEventListener('pointerdown', function(event){
+            event.stopPropagation()
+            event.preventDefault()
+            scope.visible = false
+          }, false)
+          vail.addEventListener('pointermove', function(event){
+            event.stopPropagation()
+            event.preventDefault()
+          }, false)
+          vail.addEventListener('pointerup', function(event){
+            event.stopPropagation()
+            event.preventDefault()
+          }, false)
+
           window.addEventListener('scroll', function(event){
             scope.visible = false
           }, false)
@@ -84,13 +107,12 @@
             scope.visible = false
           }, false)
 
-
-
           var expandTimeout = {};
 
           this.addEventListener('floating-item-hovered', function(event){
             clearTimeout(expandTimeout)
-            if (d > 0 || expandTimeout.cleared || (event.detail.submenu && event.detail.submenu.empty)) {
+            var isTap = (event.detail.pointerId > 1)
+            if (d > 0 || isTap || expandTimeout.cleared || (!event.detail.submenu || event.detail.submenu && event.detail.submenu.empty)) {
               expandSubmenu(event.detail)
             } else {
               expandTimeout.cleared = false;
@@ -104,11 +126,6 @@
             Platform.flush()
           }
 
-
-
-          this.addEventListener('pointerdown', function(event){
-            event.stopPropagation()
-          }, false)
           this.addEventListener('pointerup', function(event){
             event.stopPropagation()
           }, false)
@@ -120,8 +137,9 @@
         },
         visibleChanged: function() {
           this.classList.toggle('visible', this.visible)
-          vail.classList.toggle('visible', this.visible)
           this.$.mainmenu.visible = this.visible
+          this.$.mainmenu.expanded = this.visible
+          vail.visible = this.visible
         }
       })
 
@@ -134,13 +152,14 @@
   <template><content></content></template>
   <script>
     Polymer('floating-submenu', {
+      top: 0,
       ready: function() {
         this.setAttribute('touch-action', 'none')
         this.classList.add('floating-submenu')
 
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation()
-          // unexpand all except currently expanded
+          // unexpand all except the one just expanded
           var c = this.childNodes
           for (var i = 0; i < c.length; i++ ){
             if (c[i].nodeName == "FLOATING-MENU-ITEM" && c[i] != event.detail) {
@@ -151,25 +170,27 @@
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded)
+        this.style.visibility = 'hidden'
+        // unexpand all
+        var c = this.childNodes
+        for (var i = 0; i < c.length; i++ ){
+          if (c[i].nodeName == "FLOATING-MENU-ITEM") c[i].expanded = false
+        }
         if (this.expanded) {
-          // TODO : test: should unexpand all
-          var c = this.childNodes
-          for (var i = 0; i < c.length; i++ ){
-            if (c[i].nodeName == "FLOATING-MENU-ITEM") {
-              c[i].expanded = false
-            }
-          }            
           // bottom clipping
-          this.style.top = '0'
           var rect = this.getBoundingClientRect()
-          var bottomDist = (rect.bottom+16) - window.innerHeight
-          if (bottomDist > 0) this.style.top = - bottomDist + 'px'
-          else this.style.top = '0'
+          var bottomDist = (rect.bottom-this.top+16) - window.innerHeight
+          if (bottomDist > 0) this.top = - bottomDist
+          else this.top = 0
           // right clipping
           var rightDist = (rect.right+16) - window.innerWidth 
           if (rightDist > 0) this.fire('floating-submenu-clipped', rightDist)
         }
         Platform.flush()
+        this.style.visibility = 'visible'
+      },
+      topChanged: function() {
+        this.style.top = this.top + 'px'
       },
       emptyChanged: function() {
         this.classList.toggle('empty', this.empty)
@@ -195,6 +216,7 @@
         var scope = this
         this.classList.remove('empty')
         this.addEventListener('pointerover', function(event) {  
+          scope.pointerId = event.pointerId
           this.fire('floating-item-hovered', scope)
           event.stopPropagation()  
         }, false)

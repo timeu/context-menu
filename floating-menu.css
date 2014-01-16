@@ -1,3 +1,5 @@
+
+
 @host {
   * {
     user-select: none;
@@ -11,18 +13,20 @@
   }
 
   .floating-menu-vail {
-    display: block;
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
-    background: rgba(0,0,0,0.5);
+    background: black;
     z-index: 999999;
-    display: none;
+    opacity: 0;
   }
+
   .floating-menu-vail.visible {
     display: block;
+    opacity: 0.5;
   }
 
   .floating-menu {
@@ -62,6 +66,7 @@
 
   .floating-submenu {
     display: none;
+    /*visibility: hidden;*/
     position: absolute;
     top:0;
     left: 100%;
@@ -74,6 +79,7 @@
   }
   .floating-submenu:not(.empty).expanded {
     display: block;
+    /*visibility: visible;*/
   }
 
 }
