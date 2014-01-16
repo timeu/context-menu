@@ -54,12 +54,14 @@
           var x = 0, y = 0, d = 0
 
           this.parent.addEventListener('pointerdown', function(event){
+            event.stopPropagation()
             event.preventDefault()
             x = event.clientX
             y = event.clientY
           }, false)
 
           this.parent.addEventListener('pointerup', function(event){
+            event.stopPropagation()
             event.preventDefault()
             var l = dist(x, y, event.clientX, event.clientY)
             var isRightClick = (event.pointerType == "mouse" && (event.button == 2 || event.ctrlKey) && l < 5)
@@ -73,8 +75,8 @@
           }, false)
 
           this.addEventListener('pointermove', function(event){
-            // console.log(event)
             event.stopPropagation()
+            event.preventDefault()
             var newD = Math.abs(event.pageY - y) -(event.pageX - x)
             d = (d*2 + newD) / 3
             x = event.pageX
@@ -84,6 +86,7 @@
 
           vail.addEventListener('pointerover', function(event){
             event.stopPropagation()
+            event.preventDefault()
             closeTimeout = setTimeout(function(){
               scope.visible = false
             }, 500)
@@ -229,16 +232,16 @@
         var scope = this
         this.classList.remove('empty')
         this.addEventListener('pointerover', function(event) {  
+          event.stopPropagation()
           scope.pointerId = event.pointerId
           this.fire('floating-item-hovered', scope)
-          event.stopPropagation()  
         }, false)
       },
       actionChanged: function() {
         var scope = this
-        this.addEventListener('pointerup', function(event) {
-          //TODO: make sure it doesent fire on mobile when extended next to the right window edge
+        this.addEventListener('pointerdown', function(event) {
           event.stopPropagation()
+          event.preventDefault()
           scope.action()
           scope.fire('floating-menu-item-clicked', scope)
         }, false)
@@ -246,7 +249,6 @@
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded)
         if (this.expanded) this.fire('floating-item-expanded', this);
-
         // TODO: identify submenu better
         if (!this.submenu){
           var c = this.childNodes
