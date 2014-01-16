@@ -1,6 +1,9 @@
 floating-menu
 =============
-![floating menu](https://raw.github.com/arodic/floating-menu/doc/floating-menu-screen-capture.gif)
+![floating menu](https://raw.github.com/arodic/floating-menu/gh-pages/floating-menu-screen-capture.gif)
+
+*[Live Demo](http://aleksandarrodic.com/floating-menu/)*
+--------------------------------------------------------
 
 Floating menu custom element with a simple API. Designed and polished for simple user experience on both desktop and mobile.
 
