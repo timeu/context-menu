@@ -8,6 +8,7 @@
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
+    white-space:nowrap;
     font-size: 12px;
     color: white;
   }

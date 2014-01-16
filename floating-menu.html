@@ -111,13 +111,23 @@
 
           this.addEventListener('floating-item-hovered', function(event){
             clearTimeout(expandTimeout)
-            var isTap = (event.detail.pointerId > 1)
-            if (d > 0 || isTap || expandTimeout.cleared || (!event.detail.submenu || event.detail.submenu && event.detail.submenu.empty)) {
-              expandSubmenu(event.detail)
+            var isMouse = (event.detail.pointerId == 1)
+
+            var noneSelected = true
+            var c = event.detail.parentNode.childNodes
+            for (var i = 0; i < c.length; i++ ){
+              if (c[i].nodeName == "FLOATING-MENU-ITEM" && c[i] != event.detail && c[i].expanded) {
+                noneSelected = false
+              }
+            } 
+
+            if (d > 0 || !isMouse || noneSelected) {// || expandTimeout.cleared) {
+              expandSubmenu(event.detail)         
             } else {
               expandTimeout.cleared = false;
               expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 1000) 
             }
+
           }, false)
 
           var expandSubmenu = function(node) {
@@ -156,6 +166,7 @@
       ready: function() {
         this.setAttribute('touch-action', 'none')
         this.classList.add('floating-submenu')
+        var scope = this;
 
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation()
@@ -199,7 +210,7 @@
   </script>
 </polymer-element>
 
-<polymer-element name="floating-menu-item" attributes="label action">
+<polymer-element name="floating-menu-item" attributes="label action expanded">
   <template>
     <link href="floating-menu.css" rel="stylesheet" type="text/css">
     {{label}}<content></content>
