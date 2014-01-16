@@ -60,7 +60,8 @@
     background: #fff;
     opacity: 0.25;
   }
-  .floating-menu-item:not(.empty).expanded:hover {
+  .floating-menu-item:not(.empty).expanded {
+    /*TODO: only when hover when not mobile*/
     background: #999;
     color: #fff;
   }

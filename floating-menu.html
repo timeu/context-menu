@@ -41,6 +41,9 @@
           this.classList.add('floating-menu')
           this.parent = this.parent || document.body;
           this.parent.setAttribute( 'oncontextmenu', 'return false')
+          this.parent = ShadowDOMPolyfill.wrapIfNeeded(this.parent)
+          this.parent.setAttribute('touch-action', 'none')
+
           document.body.appendChild(vail)
         },
         parentChanged: function() {
@@ -59,9 +62,8 @@
           this.parent.addEventListener('pointerup', function(event){
             event.preventDefault()
             var l = dist(x, y, event.clientX, event.clientY)
-            var isRightClick = (event.pointerId == 1 && (event.button == 2 || event.ctrlKey) && l < 5)
-            var isTap = (event.pointerId > 1 && l < 5)
-
+            var isRightClick = (event.pointerType == "mouse" && (event.button == 2 || event.ctrlKey) && l < 5)
+            var isTap = (event.pointerType == "touch" && l < 5)
             if (isRightClick || isTap) {
               scope.visible = true
               scope.style.top = event.clientY - 8 + "px"
@@ -111,7 +113,7 @@
 
           this.addEventListener('floating-item-hovered', function(event){
             clearTimeout(expandTimeout)
-            var isMouse = (event.detail.pointerId == 1)
+            var isMouse = event.pointerType == "mouse"
 
             var noneSelected = true
             var c = event.detail.parentNode.childNodes
@@ -235,6 +237,7 @@
       actionChanged: function() {
         var scope = this
         this.addEventListener('pointerup', function(event) {
+          //TODO: make sure it doesent fire on mobile when extended next to the right window edge
           event.stopPropagation()
           scope.action()
           scope.fire('floating-menu-item-clicked', scope)
