@@ -179,10 +179,13 @@
         this.addEventListener('pointermove', function(event){
           y = (event.clientY / window.innerHeight - 0.5)          
         }, false)
+        this.addEventListener('pointerleave', function(event){
+          y = 0         
+        }, false)
 
         var align = function() {
           requestAnimationFrame(align)
-          if (scope.expanded){
+          if (scope.expanded && y){
             var rect = scope.getBoundingClientRect()
             var topDist = (rect.top)
             var bottomDist = window.innerHeight - (rect.bottom+MARGIN)
@@ -191,8 +194,8 @@
               Platform.flush()
             }
             if (bottomDist < 0 && y > 0) {
-               scope.top += Math.max(bottomDist, -30) * Math.pow(Math.abs(y), 2)
-               Platform.flush()
+              scope.top += Math.max(bottomDist, -30) * Math.pow(Math.abs(y), 2)
+              Platform.flush()
             }
           }
         }
@@ -254,7 +257,7 @@
   </template>
   <script>
   (function() {
-    var HOLD_TIME = 200
+    var HOLD_TIME = 500
     var EXPAND_DELAY = 500
     Polymer('floating-menu-item', {
       label: '',
@@ -276,10 +279,14 @@
         this.addEventListener('pointerup', function(event) {
           event.stopPropagation()
           event.preventDefault()
-          // todo make sure it doesent trigger when hovered unintentionally
-          if (scope.action) scope.action()
-          if (scope.action || scope.submenu.empty)
-            scope.fire('floating-menu-item-clicked', scope)
+          if (!scope.hold){
+            if (scope.action) {
+              scope.action()
+              scope.fire('floating-menu-item-clicked', scope)
+            } else if (scope.submenu.empty) {
+              scope.fire('floating-menu-item-clicked', scope)
+            }
+          }
         }, false)
 
       },
