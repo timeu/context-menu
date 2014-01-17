@@ -77,10 +77,10 @@
           this.addEventListener('pointermove', function(event){
             event.stopPropagation()
             event.preventDefault()
-            var newD = Math.abs(event.pageY - y) -(event.pageX - x)
-            d = (d*2 + newD) / 3
-            x = event.pageX
-            y = event.pageY
+            var newD = Math.abs(event.clientY - y) / 2 - (event.clientX - x)
+            d = newD;//(d*2 + newD) / 3
+            x = event.clientX
+            y = event.clientY
             clearTimeout(closeTimeout)
           }, false)
 
@@ -116,8 +116,7 @@
 
           this.addEventListener('floating-item-hovered', function(event){
             clearTimeout(expandTimeout)
-            var isMouse = event.pointerType == "mouse"
-
+            var isMouse = event.detail.pointerEvent.pointerType == "mouse"
             var noneSelected = true
             var c = event.detail.parentNode.childNodes
             for (var i = 0; i < c.length; i++ ){
@@ -130,7 +129,7 @@
               expandSubmenu(event.detail)         
             } else {
               expandTimeout.cleared = false;
-              expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 1000) 
+              expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 300) 
             }
 
           }, false)
@@ -271,7 +270,7 @@
         this.classList.remove('empty')
         this.addEventListener('pointerover', function(event) {  
           event.stopPropagation()
-          scope.pointerId = event.pointerId
+          scope.pointerEvent = event
           scope.fire('floating-item-hovered', scope)
         }, false)
 
