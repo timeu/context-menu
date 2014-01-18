@@ -1,25 +1,28 @@
-<polymer-element name="floating-menu-vail">
+<polymer-element name="floating-menu-veil">
   <link href="floating-menu.css" rel="stylesheet" type="text/css">
   <template></template>
   <script>
-    Polymer('floating-menu-vail', {
+    Polymer('floating-menu-veil', {
       ready: function() {
         this.setAttribute('touch-action', 'none')
-        this.classList.add('floating-menu-vail')
+        this.classList.add('floating-menu-veil')
       },
       visibleChanged: function() {
         this.classList.toggle('visible', this.visible)
+      },
+      hiddenChanged: function() {
+        this.classList.toggle('hidden', this.hidden)
       }
     })
   </script>
 </polymer-element>
 
-<polymer-element name="floating-menu" attributes="parent options">
+<polymer-element name="floating-menu" attributes="parent options hideveil">
   <template>
     <link href="floating-menu.css" rel="stylesheet" type="text/css">
     <floating-submenu id="mainmenu">
       <template repeat="{{options}}" id="root">
-        <floating-menu-item id="item" label="{{label}}" action="{{action}}">
+        <floating-menu-item id="item" label="{{label}}" action="{{action}}" param="{{param}}" >
           <floating-submenu ref="item" empty="{{options == undefined}}">
             <template ref="root" repeat="{{options}}"></template>
           </floating-submenu>
@@ -30,12 +33,13 @@
   <script>
     (function() {
 
-      var vail = document.createElement('floating-menu-vail')
+      var veil = document.createElement('floating-menu-veil')
       var dist = function(x1, y1, x2, y2) {  
         return Math.sqrt( Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) );
       }
 
       Polymer('floating-menu', {
+        veil: true,
         ready: function() {
           this.setAttribute('touch-action', 'none')
           this.classList.add('floating-menu')
@@ -43,8 +47,7 @@
           this.parent.setAttribute( 'oncontextmenu', 'return false')
           this.parent = ShadowDOMPolyfill.wrapIfNeeded(this.parent)
           this.parent.setAttribute('touch-action', 'none')
-
-          document.body.appendChild(vail)
+          document.body.appendChild(veil)
         },
         parentChanged: function() {
 
@@ -77,31 +80,31 @@
           this.addEventListener('pointermove', function(event){
             event.stopPropagation()
             event.preventDefault()
-            var newD = Math.abs(event.clientY - y) / 2 - (event.clientX - x)
+            var newD = Math.abs(event.clientY - y) - (event.clientX - x)
             d = newD;//(d*2 + newD) / 3
             x = event.clientX
             y = event.clientY
             clearTimeout(closeTimeout)
           }, false)
 
-          vail.addEventListener('pointerover', function(event){
-            event.stopPropagation()
+          veil.addEventListener('pointerover', function(event){
+            //event.stopPropagation()
             event.preventDefault()
             closeTimeout = setTimeout(function(){
               scope.visible = false
             }, 500)
           }, false)
-          vail.addEventListener('pointerdown', function(event){
-            event.stopPropagation()
+          veil.addEventListener('pointerdown', function(event){
+            //event.stopPropagation()
             event.preventDefault()
             scope.visible = false
           }, false)
-          vail.addEventListener('pointermove', function(event){
-            event.stopPropagation()
+          veil.addEventListener('pointermove', function(event){
+            //event.stopPropagation()
             event.preventDefault()
           }, false)
-          vail.addEventListener('pointerup', function(event){
-            event.stopPropagation()
+          veil.addEventListener('pointerup', function(event){
+            //event.stopPropagation()
             event.preventDefault()
           }, false)
 
@@ -129,7 +132,7 @@
               expandSubmenu(event.detail)         
             } else {
               expandTimeout.cleared = false;
-              expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 300) 
+              expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 100) 
             }
 
           }, false)
@@ -153,8 +156,9 @@
           this.classList.toggle('visible', this.visible)
           this.$.mainmenu.visible = this.visible
           this.$.mainmenu.expanded = this.visible
-          vail.visible = this.visible
-        }
+          veil.visible = this.visible
+          veil.hidden = this.hideveil
+        },
       })
 
     }())
@@ -204,7 +208,7 @@
           var c = this.childNodes
           for (var i = 0; i < c.length; i++ ){
             if (c[i].nodeName == "FLOATING-MENU-ITEM" && c[i] != event.detail) {
-              if (c[i].expanded) c[i].expanded = false
+              c[i].expanded = false
             }
           }
         }, false)
@@ -248,10 +252,10 @@
   </script>
 </polymer-element>
 
-<polymer-element name="floating-menu-item" attributes="label action expanded">
+<polymer-element name="floating-menu-item" attributes="label action param expanded">
   <template>
     <link href="floating-menu.css" rel="stylesheet" type="text/css">
-    {{label}}<content></content>
+    &nbsp;{{label}}&nbsp;<content></content>
   </template>
   <script>
   (function() {
@@ -279,7 +283,7 @@
           event.preventDefault()
           if (!scope.hold){
             if (scope.action) {
-              scope.action()
+              scope.action(scope.param)
               scope.fire('floating-menu-item-clicked', scope)
             } else if (scope.submenu.empty) {
               scope.fire('floating-menu-item-clicked', scope)

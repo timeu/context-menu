@@ -13,7 +13,7 @@
     color: white;
   }
 
-  .floating-menu-vail {
+  .floating-menu-veil {
     display: none;
     position: fixed;
     top: 0;
@@ -24,10 +24,12 @@
     z-index: 999999;
     opacity: 0;
   }
-
-  .floating-menu-vail.visible {
+  .floating-menu-veil.visible {
     display: block;
     opacity: 0.5;
+  }
+  .floating-menu-veil.hidden {
+    display: none;
   }
 
   .floating-menu {
@@ -50,7 +52,7 @@
     cursor: pointer;
     min-width: 80px;
     padding: 2px 4px;
-    border-radius: 4px;
+    border-radius: 2px;
   }
   .floating-menu-item.empty {
     height: 1px;
