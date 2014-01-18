@@ -88,23 +88,23 @@
           }, false)
 
           veil.addEventListener('pointerover', function(event){
-            //event.stopPropagation()
+            event.stopPropagation()
             event.preventDefault()
             closeTimeout = setTimeout(function(){
               scope.visible = false
             }, 500)
           }, false)
           veil.addEventListener('pointerdown', function(event){
-            //event.stopPropagation()
+            event.stopPropagation()
             event.preventDefault()
             scope.visible = false
           }, false)
           veil.addEventListener('pointermove', function(event){
-            //event.stopPropagation()
+            event.stopPropagation()
             event.preventDefault()
           }, false)
           veil.addEventListener('pointerup', function(event){
-            //event.stopPropagation()
+            event.stopPropagation()
             event.preventDefault()
           }, false)
 
@@ -178,14 +178,16 @@
         this.setAttribute('touch-action', 'none')
         this.classList.add('floating-submenu')
         var scope = this;
+
+        // scrolling
         this.addEventListener('pointermove', function(event){
           scope._y = (event.clientY / window.innerHeight - 0.5)          
         }, false)
         this.addEventListener('pointerleave', function(event){ scope._y = 0 }, false)
         this.addEventListener('pointerout', function(event){ scope._y = 0 }, false)
 
-        var align = function() {
-          requestAnimationFrame(align)
+        var scroll = function() {
+          requestAnimationFrame(scroll)
           if (scope.expanded && scope._y){
             var rect = scope.getBoundingClientRect()
             var topDist = (rect.top)
@@ -200,7 +202,8 @@
             }
           }
         }
-        align()
+        scroll()
+        //
 
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation()
@@ -216,13 +219,14 @@
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded)
         this.style.visibility = 'hidden'
+        // this.style.maxHeight = window.innerHeight - MARGIN
         // unexpand all
         var c = this.childNodes
         for (var i = 0; i < c.length; i++ ){
           if (c[i].nodeName == "FLOATING-MENU-ITEM") c[i].expanded = false
         }
         if (this.expanded) {
-          this._y = 0
+          this._y = 0 // scrolling
           // bottom clipping
           var rect = this.getBoundingClientRect()
           var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight
