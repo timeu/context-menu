@@ -236,7 +236,7 @@
       },
       actionChanged: function() {
         var scope = this
-        this.addEventListener('pointerup', function(event) {
+        this.addEventListener('pointerdown', function(event) {
           //TODO: make sure it doesent fire on mobile when extended next to the right window edge
           event.stopPropagation()
           scope.action()
