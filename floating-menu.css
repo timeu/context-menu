@@ -5,6 +5,7 @@
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
+    -ms-user-select: none;
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -14,8 +15,11 @@
     color: white;
   }
 
-  .floating-menu-veil {
+  floating-menu-veil {
     display: none;
+    /*pointer-events: none;*/
+  }
+  floating-menu-veil.visible {
     position: fixed;
     top: 0;
     left: 0;
@@ -23,17 +27,11 @@
     right: 0;
     background: black;
     z-index: 999999;
-    opacity: 0;
-  }
-  .floating-menu-veil.visible {
     display: block;
-    opacity: 0.5;
-  }
-  .floating-menu-veil.hidden {
-    display: none;
+    opacity: 0.25;
   }
 
-  .floating-menu {
+  floating-menu {
     -webkit-transform: translateZ(0);
     -moz-transform: translateZ(0);
     -ms-transform: translateZ(0);
@@ -43,11 +41,11 @@
     position: fixed;
     z-index: 1000000;
   }
-  .floating-menu.visible {
+  floating-menu.expanded {
     visibility: visible;
   }
 
-  .floating-menu-item {
+  floating-menu-item {
     position: relative;
     display: block;
     cursor: pointer;
@@ -55,28 +53,31 @@
     padding: 2px 4px;
     border-radius: 1px;
   }
-  .floating-menu-item.empty {
+  floating-menu-item.noAction {
+    opacity: 0.25;
+  }
+  floating-menu-item.empty {
     height: 1px;
     border-radius: 0;
     margin: 0 4px;
     padding: 0;
     background: #fff;
-    opacity: 0.25;
+    opacity: 0.5;
   }
-  .floating-menu-item:not(.empty).expanded {
-    /*TODO: only when hover when not mobile*/
+  floating-menu-item:not(.empty).expanded {
     background: #999;
     color: #fff;
   }
+  floating-menu-item:not(.empty):hover {
+  }
 
-  .floating-submenu {
+  floating-submenu {
     -webkit-transform: translateZ(0);
     -moz-transform: translateZ(0);
     -ms-transform: translateZ(0);
     -o-transform: translateZ(0);
     transform: translateZ(0);
     display: none;
-    /*visibility: hidden;*/
     position: absolute;
     top:0;
     left: 100%;
@@ -87,9 +88,8 @@
     background: #666;
     box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
   }
-  .floating-submenu:not(.empty).expanded {
+  floating-submenu:not(.empty).expanded {
     display: block;
-    /*visibility: visible;*/
   }
 
 }
