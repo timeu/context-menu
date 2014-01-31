@@ -287,7 +287,8 @@
           event.preventDefault()
           if (!scope.hold){
             if (scope.action) {
-              scope.action(scope.param)
+              if (typeof scope.param == 'function') scope.action(scope.param())
+              else scope.action(scope.param)
               scope.fire('floating-menu-item-clicked', scope)
             } else if (scope.submenu.empty) {
               scope.fire('floating-menu-item-clicked', scope)
