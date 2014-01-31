@@ -65,25 +65,13 @@
         }, false)
 
         this.veil.addEventListener('pointerover', function(event){
-          // event.stopPropagation()
-          // event.preventDefault()
           scope.timeout = setTimeout(function(){
             scope.expanded = false
           }, 500)
         }, false)
         this.veil.addEventListener('pointerdown', function(event){
-          // event.stopPropagation()
-          // event.preventDefault()
           scope.expanded = false
         }, false)
-        // this.veil.addEventListener('pointermove', function(event){
-        //   event.stopPropagation()
-        //   event.preventDefault()
-        // }, false)
-        // this.veil.addEventListener('pointerup', function(event){
-        //   event.stopPropagation()
-        //   event.preventDefault()
-        // }, false)
 
         window.addEventListener('scroll', function(event){
           scope.expanded = false
@@ -147,7 +135,8 @@
           event.stopPropagation()
           event.preventDefault()
           var l = Math.sqrt( Math.pow(event.clientX - x, 2) + Math.pow(event.clientY - y, 2) )
-          if (l < 5) {
+          var isRight = event.button == 2 || event.pointerType == "touch"
+          if (l < 5 && isRight) {
             scope.expanded = true
             scope.style.top = event.clientY - 8 + "px"
             scope.style.left = event.clientX - 8 + "px"
