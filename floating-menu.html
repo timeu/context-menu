@@ -4,29 +4,29 @@
   <script>
     Polymer('floating-menu-veil', {
       ready: function() {
-        this.setAttribute('touch-action', 'none')
-        this.setAttribute( 'oncontextmenu', 'return false')
+        this.setAttribute('touch-action', 'none');
+        this.setAttribute( 'oncontextmenu', 'return false');
         this.addEventListener('pointerover', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-        }, false)
+          event.stopPropagation();
+          event.preventDefault();
+        }, false);
         this.addEventListener('pointerdown', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-        }, false)
+          event.stopPropagation();
+          event.preventDefault();
+        }, false);
         this.addEventListener('pointermove', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-        }, false)
+          event.stopPropagation();
+          event.preventDefault();
+        }, false);
         this.addEventListener('pointerup', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-        }, false)
+          event.stopPropagation();
+          event.preventDefault();
+        }, false);
       },
       visibleChanged: function() {
-        this.classList.toggle('visible', this.visible)
+        this.classList.toggle('visible', this.visible);
       }
-    })
+    });
   </script>
 </polymer-element>
 
@@ -225,8 +225,8 @@
 </polymer-element>
 
 <polymer-element name="floating-menu-item" attributes="label action param expanded empty">
+  <link href="floating-menu.css" rel="stylesheet" type="text/css" />
   <template>
-    <link href="floating-menu.css" rel="stylesheet" type="text/css" />
     &nbsp;{{label}}&nbsp;<content></content>
   </template>
   <script>
