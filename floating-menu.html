@@ -1,300 +1,86 @@
-<polymer-element name="floating-menu-veil">
-  <link href="floating-menu.css" rel="stylesheet" type="text/css" />
-  <template></template>
-  <script>
-    Polymer('floating-menu-veil', {
-      ready: function() {
-        this.setAttribute('touch-action', 'none');
-        this.setAttribute( 'oncontextmenu', 'return false');
-        this.addEventListener('pointerover', function(event){
-          event.stopPropagation();
-          event.preventDefault();
-        }, false);
-        this.addEventListener('pointerdown', function(event){
-          event.stopPropagation();
-          event.preventDefault();
-        }, false);
-        this.addEventListener('pointermove', function(event){
-          event.stopPropagation();
-          event.preventDefault();
-        }, false);
-        this.addEventListener('pointerup', function(event){
-          event.stopPropagation();
-          event.preventDefault();
-        }, false);
-      },
-      visibleChanged: function() {
-        this.classList.toggle('visible', this.visible);
-      }
-    });
-  </script>
-</polymer-element>
+<link rel="import" href="floating-menu-veil.html">
+<link rel="import" href="floating-submenu.html">
+<link rel="import" href="floating-menu-item.html">
 
 <polymer-element name="floating-menu" attributes="parent options">
   <template>
     <link href="floating-menu.css" rel="stylesheet" type="text/css" />
-    <floating-submenu id="mainmenu">
-      <template repeat="{{options}}" id="root">
-        <floating-menu-item id="item" label="{{label}}" action="{{action}}" param="{{param}}" empty="{{options == undefined}}">
-          <floating-submenu ref="item" empty="{{options == undefined}}">
-            <template ref="root" repeat="{{options}}"></template>
-          </floating-submenu>
-        </floating-menu-item>
-      </template>
+    <floating-submenu id="submenu" expanded="{{expanded}}" options="{{options}}">
+      <content></content>
     </floating-submenu>
   </template>
   <script>
+  (function() {
+
+    var HOLD_TIME = 250;
+    var MARGIN = 8;
+
     Polymer('floating-menu', {
+      expanded: false,
       ready: function() {
-        this.veil = document.createElement('floating-menu-veil')
-        document.body.appendChild(this.veil)
-      },
-      timeout: function() {},
-      optionsChanged: function() {
-        var scope = this
-        var x = 0, y = 0, d = 0
+
+        this.addEventListener('DOMSubtreeModified', function(event){
+          scope.$.submenu.htmlItems = scope.querySelectorAll('floating-menu-item');
+        }, false);
+
+        var scope = this;
+        var timeout;
+        
+        this.veil = document.querySelector('#floating-menu-veil');
+
+        // menu-closing events
+        this.veil.addEventListener('pointerover', function(event){
+          timeout = setTimeout(function(){
+            scope.expanded = false;
+          }, HOLD_TIME);
+        });
+        this.veil.addEventListener('pointerdown', function(event){
+          scope.expanded = false;
+        });
+        window.addEventListener('scroll', function(event){
+          scope.expanded = false;
+        });
+        this.addEventListener('floating-menu-item-clicked', function(event){
+          scope.expanded = false;
+        });
 
         this.addEventListener('pointermove', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-          var newD = Math.abs(event.clientY - y)/2 - (event.clientX - x)
-          d = (d*2 + newD) / 3
-          x = event.clientX
-          y = event.clientY
-          clearTimeout(scope.timeout)
-        }, false)
+          clearTimeout(timeout);
+        });
 
-        this.veil.addEventListener('pointerover', function(event){
-          scope.timeout = setTimeout(function(){
-            scope.expanded = false
-          }, 500)
-        }, false)
-        this.veil.addEventListener('pointerdown', function(event){
-          scope.expanded = false
-        }, false)
-
-        window.addEventListener('scroll', function(event){
-          scope.expanded = false
-        }, false)
-        this.addEventListener('floating-menu-item-clicked', function(event){
-          scope.expanded = false
-        }, false)
-
-        var expandTimeout = {};
-
-        this.addEventListener('floating-item-hovered', function(event){
-          clearTimeout(expandTimeout)
-          var isMouse = event.detail.pointerEvent.pointerType == "mouse"
-          var noneSelected = true
-          var c = event.detail.parentNode.childNodes
-          for (var i = 0; i < c.length; i++ ){
-            if (c[i].nodeName == "FLOATING-MENU-ITEM" && c[i] != event.detail && c[i].expanded) {
-              noneSelected = false
-            }
-          } 
-
-          if (d > 0 || !isMouse || noneSelected) {
-            expandSubmenu(event.detail)         
-          } else {
-            expandTimeout.cleared = false;
-            expandTimeout = setTimeout(function(){expandSubmenu(event.detail)}, 100) 
-          }
-
-        }, false)
-
-        var expandSubmenu = function(node) {
-          node.expanded = true
-          expandTimeout.cleared = true;
-          Platform.flush()
-        }
-
-        this.addEventListener('pointerup', function(event){
-          event.stopPropagation()
-        }, false)
         // right clipping
-        this.addEventListener('floating-submenu-clipped', function(event){
-          var rect = scope.getBoundingClientRect()
-          scope.style.left = rect.left - event.detail + 'px'
-        })
+        this.addEventListener('floating-submenu-expanded', function(event){
+          event.stopPropagation();
+          var rect = scope.getBoundingClientRect();
+          var submenuRect = scope.$.submenu.getBoundingClientRect();
+          var rightDist = (submenuRect.right+MARGIN) - window.innerWidth; 
+          if (rightDist > 0) scope.style.left = rect.left - rightDist + 'px';
+        });
+
+        this.expand = function(event) {
+          event.preventDefault();
+          scope.expanded = true;
+          scope.style.top = event.clientY - 8 + "px";
+          scope.style.left = event.clientX - 8 + "px";
+          clearTimeout(timeout);
+        };
+
+        document.addEventListener('contextmenu', this.expand);
       },
       parentChanged: function() {
-        var scope = this
-        var x = 0, y = 0
-
-        this.parent = ShadowDOMPolyfill.wrapIfNeeded(this.parent)
-        this.parent.setAttribute( 'oncontextmenu', 'return false')
-
-        this.parent.addEventListener('pointerdown', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-          x = event.clientX
-          y = event.clientY
-        }, false)
-
-        this.parent.addEventListener('pointerup', function(event){
-          event.stopPropagation()
-          event.preventDefault()
-          var l = Math.sqrt( Math.pow(event.clientX - x, 2) + Math.pow(event.clientY - y, 2) )
-          var isRight = event.button == 2 || event.pointerType == "touch"
-          if (l < 5 && isRight) {
-            scope.expanded = true
-            scope.style.top = event.clientY - 8 + "px"
-            scope.style.left = event.clientX - 8 + "px"
-            clearTimeout(scope.timeout)
-          }
-        }, false)
+        document.removeEventListener('contextmenu', this.expand);
+        this.parent.addEventListener('contextmenu', this.expand);
       },
       expandedChanged: function() {
-        this.classList.toggle('expanded', this.expanded)
-        this.$.mainmenu.expanded = this.expanded
-        this.$.mainmenu.expanded = this.expanded
-        this.veil.visible = this.expanded
-        if (this.expanded) this.fire('floating-menu-expanded', this)
-        else this.fire('floating-menu-collapsed', this)
-        Platform.flush()
-      }
-    })
-  </script>
-</polymer-element>
-
-<polymer-element name="floating-submenu" attributes="expanded empty">
-  <link href="floating-menu.css" rel="stylesheet" type="text/css" />
-  <template><content></content></template>
-  <script>
-  (function() {
-    var MARGIN = 16
-    Polymer('floating-submenu', {
-      top: 0,
-      _y: 0,
-      ready: function() {
-        this.setAttribute('touch-action', 'none')
-        this.setAttribute('oncontextmenu', 'return false')
-        var scope = this;
-
-        this.addEventListener('pointerleave', function(event){ scope._y = 0 }, false)
-        this.addEventListener('pointerout', function(event){ scope._y = 0 }, false)
-
-        this.addEventListener('floating-item-expanded', function(event){
-          event.stopPropagation()
-          // unexpand all except the one just expanded
-          var c = this.childNodes
-          for (var i = 0; i < c.length; i++ ){
-            if (c[i].nodeName == "FLOATING-MENU-ITEM" && c[i] != event.detail) {
-              c[i].expanded = false
-            }
-          }
-        }, false)
-      },
-      expandedChanged: function() {
-        this.classList.toggle('expanded', this.expanded)
-        this.style.visibility = 'hidden'
-        // this.style.maxHeight = window.innerHeight - MARGIN
-        // unexpand all
-        var c = this.childNodes
-        for (var i = 0; i < c.length; i++ ){
-          if (c[i].nodeName == "FLOATING-MENU-ITEM") c[i].expanded = false
+        this.classList.toggle('expanded', this.expanded);
+        if (this.expanded === true) {
+          this.fire('floating-menu-expanded', this);
+        } else {
+          this.fire('floating-menu-collapsed', this);
         }
-        if (this.expanded) {
-          // bottom clipping
-          var rect = this.getBoundingClientRect()
-          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight
-          if (bottomDist > 0) this.top = - bottomDist
-          else this.top = 0
-          // right clipping
-          var rightDist = (rect.right+MARGIN) - window.innerWidth 
-          if (rightDist > 0) {
-            this.fire('floating-submenu-clipped', rightDist);
-            // init hold for children so they dont expand immediately
-            for (var i = 0; i < c.length; i++ ){
-              if (c[i].nodeName == "FLOATING-MENU-ITEM") c[i].hold = true
-            }
-          }
-        }
-        Platform.flush()
-        this.style.visibility = 'visible'
-      },
-      topChanged: function() {
-        this.style.top = this.top + 'px'
-      },
-      emptyChanged: function() {
-        this.classList.toggle('empty', this.empty)
       }
-    })
-  }())
-  </script>
-</polymer-element>
+    });
 
-<polymer-element name="floating-menu-item" attributes="label action param expanded empty">
-  <link href="floating-menu.css" rel="stylesheet" type="text/css" />
-  <template>
-    &nbsp;{{label}}&nbsp;<content></content>
-  </template>
-  <script>
-  (function() {
-    var HOLD_TIME = 500
-    var EXPAND_DELAY = 500
-    Polymer('floating-menu-item', {
-      label: '',
-      hold: false,
-      ready: function() {
-        // this.setAttribute('touch-action', 'none')
-        this.classList.add('empty')
-        this.classList.add('noAction')
-      },
-      labelChanged: function() {
-        var scope = this
-        this.classList.remove('empty')
-        this.addEventListener('pointerover', function(event) {  
-          event.stopPropagation()
-          scope.pointerEvent = event
-          scope.fire('floating-item-hovered', scope)
-        }, false)
-
-        this.addEventListener('pointerup', function(event) {
-          event.stopPropagation()
-          event.preventDefault()
-          if (!scope.hold){
-            if (scope.action) {
-              if (typeof scope.param == 'function') scope.action(scope.param())
-              else scope.action(scope.param)
-              scope.fire('floating-menu-item-clicked', scope)
-            } else if (scope.submenu.empty) {
-              scope.fire('floating-menu-item-clicked', scope)
-            }
-          }
-        }, false)
-
-      },
-      actionChanged: function() {
-        if (this.action) this.classList.remove('noAction')
-      },
-      emptyChanged: function() {
-        if (!this.empty) this.classList.remove('noAction')
-      },
-      expandedChanged: function() {
-        var scope = this
-        if (this.hold) {
-          setTimeout(function(){ scope.expandedChanged() }, EXPAND_DELAY)
-          return
-        }
-        this.classList.toggle('expanded', this.expanded)
-        if (this.expanded) this.fire('floating-item-expanded', this);
-        // TODO: identify submenu better
-        if (!this.submenu){
-          var c = this.childNodes
-          for (var i = 0; i < c.length; i++ ){
-            if (c[i].nodeName == "FLOATING-SUBMENU") {
-              this.submenu = c[i]
-            }
-          } 
-        }  
-        this.submenu.expanded = this.expanded
-      },
-      holdChanged: function() {
-        var scope = this
-        if (scope.hold) setTimeout(function(){ scope.hold = false }, HOLD_TIME)
-      }
-    })
-  }())
+  })();
   </script>
 </polymer-element>

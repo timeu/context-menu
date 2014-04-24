@@ -17,12 +17,12 @@ Use
 
 **options** options for the menu. Example:
 
-```
+```javascript
 menuOptions = [
   { label: "option1", options: [
       { label: "subOption1", options: [
         { label: "subSubOption2", action: someFunction1 },
-        { label: "subSubOption3", action: someFunction2 },
+        { label: "subSubOption3", action: someFunction2, param: 'some param' },
         {}, // separator
         { label: "subSubOption4", action: someFunction3 }
       ] },

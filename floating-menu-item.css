@@ -1,0 +1,26 @@
+:host {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  min-width: 80px;
+  padding: 2px 9px;
+  border-radius: 1px;
+  color: #ccc;
+}
+:host(:not(.active)) {
+  opacity: 0.25;
+}
+:host(:not(.labeled)) {
+  height: 1px;
+  border-radius: 0;
+  margin: 4px 0;
+  padding: 0;
+  background: #fff;
+  opacity: 0.5;
+}
+:host(.expanded.labeled) {
+  background: #69F;
+}
+:host(.labeled:hover) {
+  color: #fff;
+}

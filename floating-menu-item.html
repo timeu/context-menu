@@ -1,0 +1,72 @@
+<polymer-element name="floating-menu-item" attributes="label action param expanded options">
+  <template>
+    <link href="floating-menu-item.css" rel="stylesheet" type="text/css" />
+    <floating-submenu id="submenu" options="{{options}}" expanded="{{expanded}}"><content></content></floating-submenu>
+    &nbsp;{{label}}&nbsp;
+  </template>
+  <script>
+  (function() {
+
+    var MARGIN = 8;
+
+    Polymer('floating-menu-item', {
+      label: '',
+      action: undefined,
+      param: undefined,
+      expanded: false,
+      options: [],
+      htmlItems: [],
+      attached: function() {
+        var scope = this;
+        this.addEventListener('DOMSubtreeModified', function(event){
+          scope.htmlItems = scope.querySelectorAll('floating-menu-item');
+          scope.$.submenu.htmlItems = scope.htmlItems;
+          scope.classList.toggle('active', scope.action || scope.options.length || scope.htmlItems.length);
+        }, false);
+
+        this.addEventListener('pointerover', function(event) {  
+          scope.pointerEvent = event;
+          scope.fire('floating-item-hovered', scope);
+        });
+
+        this.addEventListener('click', function(event) {
+          if (scope.action && this.label) {
+            if (typeof scope.param == 'function') scope.action(scope.param());
+            else scope.action(scope.param);
+          }
+          scope.fire('floating-menu-item-clicked', scope);
+        });
+
+        // right clipping
+        this.addEventListener('floating-submenu-expanded', function(event){
+          event.stopPropagation();
+          var rect = scope.getBoundingClientRect();
+          var submenuRect = scope.$.submenu.getBoundingClientRect();
+          var rightDist = (rect.right+submenuRect.width+MARGIN) - window.innerWidth; 
+          if (rightDist > 0) {
+            scope.$.submenu.style.left = - submenuRect.width + 'px';
+          } else {
+            scope.$.submenu.style.left = '100%';
+          }
+        });
+
+      },
+      labelChanged: function() {
+        this.classList.toggle('labeled', this.label);
+      },
+      actionChanged: function() {
+        this.classList.toggle('active', this.action || this.options.length || this.htmlItems.length);
+      },
+      optionsChanged: function() {
+        this.classList.toggle('active', this.action || this.options.length || this.htmlItems.length);
+      },
+      expandedChanged: function() {
+        var scope = this;
+        this.classList.toggle('expanded', this.expanded);
+        if (this.expanded) this.fire('floating-item-expanded', this);
+      }
+    });
+
+  })();
+  </script>
+</polymer-element>
