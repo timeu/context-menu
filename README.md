@@ -21,7 +21,17 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
 
 --------------------------------------------------------
 
-###floating-menu element
+###Use
+
+First, make sure you included polymer.js and platform.js as well as HTML template for this element.
+
+```
+<script src="platform.js"></script>
+<script src="polymer.js"></script>
+<link rel="import" href="floating-menu.html">
+```
+
+Then, you are ready to use the element.
 
 ```<floating-menu parent="{{}}" options="{{menuOptions}}"></floating-menu>```
 
