@@ -1,0 +1,29 @@
+{
+  "name": "floating-menu",
+  "version": "0.0.1",
+  "description": "floating menu polymer element",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arodic/floating-menu.git"
+  },
+  "keywords": [
+    "floating",
+    "menu",
+    "polymer",
+    "UI"
+  ],
+  "author": "arodic",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/arodic/floating-menu/issues"
+  },
+  "homepage": "https://github.com/arodic/floating-menu",
+  "devDependencies": {
+    "grunt-shell": "^0.6.4",
+    "grunt-vulcanize": "^0.2.1"
+  }
+}
