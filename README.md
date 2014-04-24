@@ -6,6 +6,7 @@
 Custom element providing a floating menu with a simple API. It is designed and polished for fast and simple user experience on both desktop and mobile.
 
 Requires [polymer.js](http://www.polymer-project.org/)
+
 [Live Demo](http://aleksandarrodic.com/floating-menu/)
 
 ###Features
