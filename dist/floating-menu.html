@@ -1,0 +1,371 @@
+<polymer-element name="floating-menu-veil" assetpath="../">
+  <template>
+    <style type="text/css">:host {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 999999;
+  cursor: default;
+  /*background: black;*/
+  /*opacity: 0.25;*/
+}
+:host(.visible) {
+  display: block;
+}</style>
+  </template>
+  <script>
+  (function(){
+
+    var veil = document.createElement('floating-menu-veil');
+    veil.id = 'floating-menu-veil';
+    document.body.appendChild(veil);
+
+    Polymer('floating-menu-veil', {
+      ready: function() {
+
+        var scope = this;
+
+        this.setAttribute('touch-action', 'none');
+        this.setAttribute( 'oncontextmenu', 'return false');
+
+        window.addEventListener('floating-menu-expanded', function(){
+          scope.classList.toggle('visible', true);
+        });
+        window.addEventListener('floating-menu-collapsed', function(){
+          scope.classList.toggle('visible', false);
+        });
+
+      }
+    });
+  })();
+  </script>
+</polymer-element>
+<polymer-element name="floating-submenu" attributes="expanded options htmlOptions" assetpath="../">
+  <template>
+    <style type="text/css">:host {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  display: none;
+  position: absolute;
+  z-index: 1000001;
+  top:0;
+  left: 100%;
+  min-width: 80px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 0;
+  border-radius: 2px;
+  background: #666;
+  box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+:host(.expanded:not(.empty)) {
+  display: block;
+}</style>
+    <template repeat="{{options}}">
+      <floating-menu-item id="item" label="{{label}}" action="{{action}}" param="{{param}}" options="{{options}}">
+      </floating-menu-item>
+    </template>
+    <content></content>
+  </template>
+  <script>
+  (function() {
+
+    var HOLD_TIME = 250;
+    var MARGIN = 8;
+    
+    Polymer('floating-submenu', {
+      top: 0,
+      left: 0,
+      expanded: false,
+      items: [],
+      htmlItems: [], 
+      ready: function() {
+
+        var scope = this;
+        
+        this.setAttribute('touch-action', 'none');
+        this.setAttribute('oncontextmenu', 'return false');
+
+        this.addEventListener('floating-item-expanded', function(event){
+          event.stopPropagation();
+          // unexpand all except the one just expanded
+          scope.itterateItems(function(item){
+            if (item != event.detail) {
+              item.expanded = false;
+            }
+          });
+        });
+
+        var x = 0, y = 0, d = 0, tempD;
+        var expandTimeout = {};
+
+        this.addEventListener('pointermove', function(event){
+          tempD = Math.abs(event.clientY - y)/2 - (event.clientX - x);
+          d = (d*2 + tempD) / 3;
+          x = event.clientX;
+          y = event.clientY;
+        });
+
+        this.addEventListener('floating-item-hovered', function(event){
+          clearTimeout(expandTimeout);
+          var noneSelected = true;
+          scope.itterateItems(function(item){
+            if (item != event.detail && item.expanded) {
+              noneSelected = false;
+            }
+          });
+
+          if (d > 0 || event.detail.pointerEvent.pointerType != "mouse" || noneSelected) {
+            expandSubmenu(event.detail);        
+          } else {
+            expandTimeout.cleared = false;
+            expandTimeout = setTimeout(function(){expandSubmenu(event.detail);}, HOLD_TIME);
+          }
+        });
+
+        var expandSubmenu = function(node) {
+          node.expanded = true;
+          expandTimeout.cleared = true;
+        };
+
+      },
+      itterateItems: function( callback ) {
+        this.items = this.shadowRoot.querySelectorAll('floating-menu-item');
+        for (var i = 0; i < this.items.length; i++ ){
+          callback(this.items[i]);
+        }
+        // this.htmlItems needs to be set externally
+        for (i = 0; i < this.htmlItems.length; i++ ){
+          callback(this.htmlItems[i]);
+        }
+        this.classList.toggle('empty', this.items.length === 0 && this.htmlItems.length === 0);
+      },   
+      expandedChanged: function() {
+        this.classList.toggle('expanded', this.expanded);
+        // unexpand all
+        this.itterateItems(function(item){
+          item.expanded = false;
+        });
+
+        if (this.expanded) {
+          // bottom clipping
+          var rect = this.getBoundingClientRect();
+          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight;
+          if (bottomDist > 0) this.top = - bottomDist;
+          else this.top = 0;
+          this.fire('floating-submenu-expanded', this);
+        }
+      },
+      topChanged: function() {
+        this.style.top = this.top + 'px';
+      }
+    });
+  })();
+  </script>
+</polymer-element>
+<polymer-element name="floating-menu-item" attributes="label action param expanded options" assetpath="../">
+  <template>
+    <style type="text/css">:host {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  min-width: 80px;
+  padding: 2px 9px;
+  border-radius: 1px;
+  color: #ccc;
+}
+:host(:not(.active)) {
+  opacity: 0.25;
+}
+:host(:not(.labeled)) {
+  height: 1px;
+  border-radius: 0;
+  margin: 4px 0;
+  padding: 0;
+  background: #fff;
+  opacity: 0.5;
+}
+:host(.expanded.labeled) {
+  background: #69F;
+}
+:host(.labeled:hover) {
+  color: #fff;
+}</style>
+    <floating-submenu id="submenu" options="{{options}}" expanded="{{expanded}}"><content></content></floating-submenu>
+    &nbsp;{{label}}&nbsp;
+  </template>
+  <script>
+  (function() {
+
+    var MARGIN = 8;
+
+    Polymer('floating-menu-item', {
+      label: '',
+      action: undefined,
+      param: undefined,
+      expanded: false,
+      options: [],
+      htmlItems: [],
+      attached: function() {
+        var scope = this;
+        this.addEventListener('DOMSubtreeModified', function(event){
+          scope.htmlItems = scope.querySelectorAll('floating-menu-item');
+          scope.$.submenu.htmlItems = scope.htmlItems;
+          scope.classList.toggle('active', scope.action || scope.options.length || scope.htmlItems.length);
+        }, false);
+
+        this.addEventListener('pointerover', function(event) {  
+          scope.pointerEvent = event;
+          scope.fire('floating-item-hovered', scope);
+        });
+
+        this.addEventListener('click', function(event) {
+          if (scope.action && this.label) {
+            if (typeof scope.param == 'function') scope.action(scope.param());
+            else scope.action(scope.param);
+          }
+          scope.fire('floating-menu-item-clicked', scope);
+        });
+
+        // right clipping
+        this.addEventListener('floating-submenu-expanded', function(event){
+          event.stopPropagation();
+          var rect = scope.getBoundingClientRect();
+          var submenuRect = scope.$.submenu.getBoundingClientRect();
+          var rightDist = (rect.right+submenuRect.width+MARGIN) - window.innerWidth; 
+          if (rightDist > 0) {
+            scope.$.submenu.style.left = - submenuRect.width + 'px';
+          } else {
+            scope.$.submenu.style.left = '100%';
+          }
+        });
+
+      },
+      labelChanged: function() {
+        this.classList.toggle('labeled', this.label);
+      },
+      actionChanged: function() {
+        this.classList.toggle('active', this.action || this.options.length || this.htmlItems.length);
+      },
+      optionsChanged: function() {
+        this.classList.toggle('active', this.action || this.options.length || this.htmlItems.length);
+      },
+      expandedChanged: function() {
+        var scope = this;
+        this.classList.toggle('expanded', this.expanded);
+        if (this.expanded) this.fire('floating-item-expanded', this);
+      }
+    });
+
+  })();
+  </script>
+</polymer-element>
+
+<polymer-element name="floating-menu" attributes="parent options" assetpath="../">
+  <template>
+    <style type="text/css">:host {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  white-space:nowrap;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: white;
+  visibility: hidden;
+  position: fixed;
+  z-index: 1000000;
+  background: red;
+  cursor: default;
+}
+:host(.expanded) {
+  visibility: visible;
+}</style>
+    <floating-submenu id="submenu" expanded="{{expanded}}" options="{{options}}">
+      <content></content>
+    </floating-submenu>
+  </template>
+  <script>
+  (function() {
+
+    var HOLD_TIME = 250;
+    var MARGIN = 8;
+
+    Polymer('floating-menu', {
+      expanded: false,
+      ready: function() {
+
+        this.addEventListener('DOMSubtreeModified', function(event){
+          scope.$.submenu.htmlItems = scope.querySelectorAll('floating-menu-item');
+        }, false);
+
+        var scope = this;
+        var timeout;
+        
+        this.veil = document.querySelector('#floating-menu-veil');
+
+        // menu-closing events
+        this.veil.addEventListener('pointerover', function(event){
+          timeout = setTimeout(function(){
+            scope.expanded = false;
+          }, HOLD_TIME);
+        });
+        this.veil.addEventListener('pointerdown', function(event){
+          scope.expanded = false;
+        });
+        window.addEventListener('scroll', function(event){
+          scope.expanded = false;
+        });
+        this.addEventListener('floating-menu-item-clicked', function(event){
+          scope.expanded = false;
+        });
+
+        this.addEventListener('pointermove', function(event){
+          clearTimeout(timeout);
+        });
+
+        // right clipping
+        this.addEventListener('floating-submenu-expanded', function(event){
+          event.stopPropagation();
+          var rect = scope.getBoundingClientRect();
+          var submenuRect = scope.$.submenu.getBoundingClientRect();
+          var rightDist = (submenuRect.right+MARGIN) - window.innerWidth; 
+          if (rightDist > 0) scope.style.left = rect.left - rightDist + 'px';
+        });
+
+        this.expand = function(event) {
+          event.preventDefault();
+          scope.expanded = true;
+          scope.style.top = event.clientY - 8 + "px";
+          scope.style.left = event.clientX - 8 + "px";
+          clearTimeout(timeout);
+        };
+
+        document.addEventListener('contextmenu', this.expand);
+      },
+      parentChanged: function() {
+        document.removeEventListener('contextmenu', this.expand);
+        this.parent.addEventListener('contextmenu', this.expand);
+      },
+      expandedChanged: function() {
+        this.classList.toggle('expanded', this.expanded);
+        if (this.expanded === true) {
+          this.fire('floating-menu-expanded', this);
+        } else {
+          this.fire('floating-menu-collapsed', this);
+        }
+      }
+    });
+
+  })();
+  </script>
+</polymer-element>
