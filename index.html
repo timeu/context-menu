@@ -11,20 +11,32 @@
 
   <style type="text/css">
     body{
-      background: silver;
+      background: #333;
       margin: 48px;
       font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       color: white;
+    }
+    a {
+      color: white;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
   <h3><u>Floating Menu</u><h3>
-  <h4>Right-click or tap anywhere</h4>
+  <h4>Right-click or tap and hold anywhere</h4>
+  <p>
+  <a href="https://github.com/arodic/floating-menu/">
+    Documentation and code:<br />https://github.com/arodic/floating-menu/
+  </a>
+  </p>
   <floating-menu id="floating-menu">
-    <floating-menu-item></floating-menu-item>
-    <floating-menu-item label="html-dummy">
-      <floating-menu-item label="html-dummy-two"></floating-menu-item>
+    <floating-menu-item label="HTML Item">
+      <floating-menu-item label="HTML Subitem1" action="console.log" arguments="1"></floating-menu-item>
+      <floating-menu-item label="HTML Subitem2" action="console.log" arguments="2"></floating-menu-item>
+      <floating-menu-item label="HTML Subitem3">
+        <floating-menu-item label="HTML Subitem4"></floating-menu-item>
+      </floating-menu-item>
     </floating-menu-item>
   </floating-menu>
 
@@ -35,27 +47,27 @@
 
       menu.options = [
         { label: "Options", options: [
-            { label: "Even", options: [
-              { label: "Option1", action: function(){ alert('You clicked Option1.'); } },
-              { label: "Option2", action: function(){ alert('You clicked Option2.'); } },
-              { label: "Option3", action: function(){ alert('You clicked Option3.'); } }
-            ] },
-            { label: "More", options: [
-              { label: "Option4", action: function(){ alert('You clicked Option4.'); } },
-              { label: "Option5", action: function(){ alert('You clicked Option5.'); } },
-              { label: "Option6", action: function(){ alert('You clicked Option6.'); } }
-            ] },
-            { label: "Options", options: [
-              { label: "Option7", action: function(){ alert('You clicked Option7.'); } },
-              { label: "Option8", action: function(){ alert('You clicked Option8.'); } },
-              { label: "Option9", action: function(){ alert('You clicked Option9.'); } }
-            ] } 
+          { label: "Option1", options: [
+            { label: "Suboption1", action: function(){ alert('Suboption1'); } },
+            { label: "Suboption2", action: function(msg){ alert(msg); }, arguments: ['Suboption2'] },
+            { label: "Suboption3", action: function(msg1, msg2){ alert(msg1+msg2); }, arguments: ['Suboption','3'] }
+          ] },
+          { label: "Option2", options: [
+            { label: "Suboption4", action: 'alert', arguments: ['Suboption4'] },
+            { label: "Suboption5", action: 'console.log', arguments: ['Suboption', '5'] },
+            { label: "Suboption6", action: 'console.log', arguments: 'Suboption 6' }
+          ] },
+          { label: "Option3", options: [
+            { label: "suboption7" },
+            { label: "suboption8" },
+            { label: "suboption9" }
+          ] } 
         ] },
-        { label: "Recursive", options: [
+        { label: "Deep", options: [
           { label: "And", options: [
             { label: "Very", options: [
               { label: "Very", options: [
-                { label: "Deep", options: [
+                { label: "Long", options: [
                   { label: "Submemenu", options: [
                     { label: "Nesting" }
                   ] } 
@@ -63,106 +75,6 @@
               ] } 
             ] } 
           ] } 
-        ] },
-        { label: "Very long", options: [
-          { label: "PBR&B" },
-          { label: "whatever" },
-          { label: "authentic" },
-          { label: "fanny" },
-          { label: "pack" },
-          { label: "Portland." },
-          { label: "Meh" },
-          { label: "narwhal" },
-          { label: "fanny" },
-          { label: "pack," },
-          { label: "actually" },
-          { label: "shabby" },
-          { label: "chic" },
-          { label: "Thundercats" },
-          { label: "cornhole" },
-          { label: "ethical" },
-          { label: "trust" },
-          { label: "fund" },
-          { label: "bespoke" },
-          { label: "hella" },
-          { label: "slow-carb." },
-          { label: "Kale" },
-          { label: "chips" },
-          { label: "Vice" },
-          { label: "mustache," },
-          { label: "farm-to-table" },
-          { label: "bicycle" },
-          { label: "rights" },
-          { label: "messenger" },
-          { label: "bag" },
-          { label: "bitters." },
-          { label: "Keffiyeh" },
-          { label: "Intelligentsia" },
-          { label: "dreamcatcher," },
-          { label: "Bushwick" },
-          { label: "small" },
-          { label: "batch" },
-          { label: "pork" },
-          { label: "belly" },
-          { label: "Tumblr" },
-          { label: "brunch" },
-          { label: "quinoa" },
-          { label: "mlkshk." },
-          { label: "Farm-to-table" },
-          { label: "Helvetica" },
-          { label: "Odd" },
-          { label: "Future" },
-          { label: "bicycle" },
-          { label: "rights," },
-          { label: "selfies" },
-          { label: "church-key" },
-          { label: "ugh" },
-          { label: "McSweeney's" },
-          { label: "XOXO" },
-          { label: "hoodie" },
-          { label: "ethnic" },
-          { label: "American" },
-          { label: "Apparel" },
-          { label: "Neutra" },
-          { label: "selvage" },
-          { label: "Austin." },
-          { label: "Gluten-free" },
-          { label: "roof" },
-          { label: "party" },
-          { label: "mustache" },
-          { label: "synth" },
-          { label: "Odd" },
-          { label: "Future," },
-          { label: "before" },
-          { label: "they" },
-          { label: "sold" },
-          { label: "out" },
-          { label: "retro" },
-          { label: "cray" },
-          { label: "raw" },
-          { label: "denim" },
-          { label: "keffiyeh." },
-          { label: "Authentic" },
-          { label: "locavore" },
-          { label: "kogi" },
-          { label: "mlkshk," },
-          { label: "3" },
-          { label: "wolf" },
-          { label: "moon" },
-          { label: "asymmetrical" }
-        ] },
-        {},
-        { label: "File", options: [
-            { label: "Open" },
-            { label: "Save" },
-            { label: "Save As" },
-            { label: "Import" }
-        ] },
-        { label: "Edit", options: [
-            { label: "Undo" },
-            { label: "Redo" },
-            { label: "Duplicate" },
-            { label: "Delete" }
         ] }
       ];
     });

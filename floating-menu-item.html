@@ -1,4 +1,4 @@
-<polymer-element name="floating-menu-item" attributes="label action param expanded options">
+<polymer-element name="floating-menu-item" attributes="label action arguments expanded options">
   <template>
     <link href="floating-menu-item.css" rel="stylesheet" type="text/css" />
     <floating-submenu id="submenu" options="{{options}}" expanded="{{expanded}}"><content></content></floating-submenu>
@@ -9,32 +9,52 @@
 
     var MARGIN = 8;
 
+    function invokeFunction(obj, path, args) {
+      var idx = path.indexOf('.');
+      if (idx < 0) {
+        obj[path].apply(obj, args);
+        return;
+      }
+      var first = path.substring(0,idx);
+      var rest = path.substring(idx+1);
+      invokeFunction(obj[first], rest, args);
+    }
+
     Polymer('floating-menu-item', {
       label: '',
       action: undefined,
-      param: undefined,
+      arguments: undefined,
       expanded: false,
       options: [],
-      htmlItems: [],
       attached: function() {
         var scope = this;
-        this.addEventListener('DOMSubtreeModified', function(event){
-          scope.htmlItems = scope.querySelectorAll('floating-menu-item');
-          scope.$.submenu.htmlItems = scope.htmlItems;
-          scope.classList.toggle('active', scope.action || scope.options.length || scope.htmlItems.length);
-        }, false);
 
         this.addEventListener('pointerover', function(event) {  
+          event.stopPropagation();  
           scope.pointerEvent = event;
           scope.fire('floating-item-hovered', scope);
         });
 
-        this.addEventListener('click', function(event) {
-          if (scope.action && this.label) {
-            if (typeof scope.param == 'function') scope.action(scope.param());
-            else scope.action(scope.param);
-          }
-          scope.fire('floating-menu-item-clicked', scope);
+
+
+        var onClick = function(event) {
+          event.stopPropagation();
+          
+          var args = scope.arguments;
+          var action = scope.action;
+
+          if (typeof args == 'string') args = args.split(' ');
+          if (!args instanceof Array) args = [args];
+
+          if (typeof action == 'function') action.apply(null, args);
+          if (typeof action == 'string') action = invokeFunction(window, action, args);
+
+          if (scope.action || this.$.submenu.items.length === 0) scope.fire('floating-menu-item-clicked', scope);
+        };
+        
+        this.addEventListener('click', onClick);
+        this.addEventListener('pointerup', function(event) {
+          if (event.pointerType == "mouse") onClick(event);
         });
 
         // right clipping
@@ -48,22 +68,30 @@
           } else {
             scope.$.submenu.style.left = '100%';
           }
+          Platform.flush();
         });
 
+        setTimeout(function(){
+          scope.fire('floating-menu-item-attached', scope);
+        }, 1);
       },
-      labelChanged: function() {
-        this.classList.toggle('labeled', this.label);
+      detached: function() {
+        this.fire('floating-menu-item-detached', this);
       },
       actionChanged: function() {
-        this.classList.toggle('active', this.action || this.options.length || this.htmlItems.length);
+        this.checkIfActive();
       },
       optionsChanged: function() {
-        this.classList.toggle('active', this.action || this.options.length || this.htmlItems.length);
+        this.checkIfActive();
+      },
+      checkIfActive: function() {
+        this.classList.toggle('active', this.action || this.options.length || this.$.submenu.items.length);
       },
       expandedChanged: function() {
         var scope = this;
         this.classList.toggle('expanded', this.expanded);
         if (this.expanded) this.fire('floating-item-expanded', this);
+        Platform.flush();
       }
     });
 

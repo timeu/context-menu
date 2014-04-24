@@ -10,17 +10,9 @@
 :host(:not(.active)) {
   opacity: 0.25;
 }
-:host(:not(.labeled)) {
-  height: 1px;
-  border-radius: 0;
-  margin: 4px 0;
-  padding: 0;
-  background: #fff;
-  opacity: 0.5;
-}
-:host(.expanded.labeled) {
+:host(.expanded) {
   background: #69F;
 }
-:host(.labeled:hover) {
+:host(:hover) {
   color: #fff;
 }

@@ -19,11 +19,8 @@
       expanded: false,
       ready: function() {
 
-        this.addEventListener('DOMSubtreeModified', function(event){
-          scope.$.submenu.htmlItems = scope.querySelectorAll('floating-menu-item');
-        }, false);
-
         var scope = this;
+
         var timeout;
         
         this.veil = document.querySelector('#floating-menu-veil');
@@ -78,6 +75,7 @@
         } else {
           this.fire('floating-menu-collapsed', this);
         }
+        Platform.flush();
       }
     });
 

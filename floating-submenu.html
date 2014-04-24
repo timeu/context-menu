@@ -2,7 +2,7 @@
   <template>
     <link href="floating-submenu.css" rel="stylesheet" type="text/css" />
     <template repeat="{{options}}">
-      <floating-menu-item id="item" label="{{label}}" action="{{action}}" param="{{param}}" options="{{options}}">
+      <floating-menu-item id="item" label="{{label}}" action="{{action}}" arguments="{{arguments}}" options="{{options}}">
       </floating-menu-item>
     </template>
     <content></content>
@@ -17,14 +17,19 @@
       top: 0,
       left: 0,
       expanded: false,
-      items: [],
-      htmlItems: [], 
       ready: function() {
 
         var scope = this;
         
         this.setAttribute('touch-action', 'none');
         this.setAttribute('oncontextmenu', 'return false');
+
+        //TODO detach
+        scope.items = [];
+        this.addEventListener('floating-menu-item-attached', function(event){
+          event.stopPropagation();
+          scope.items.push(event.detail);
+        });
 
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation();
@@ -66,25 +71,22 @@
         var expandSubmenu = function(node) {
           node.expanded = true;
           expandTimeout.cleared = true;
+          Platform.flush();
         };
 
       },
       itterateItems: function( callback ) {
-        this.items = this.shadowRoot.querySelectorAll('floating-menu-item');
         for (var i = 0; i < this.items.length; i++ ){
           callback(this.items[i]);
         }
-        // this.htmlItems needs to be set externally
-        for (i = 0; i < this.htmlItems.length; i++ ){
-          callback(this.htmlItems[i]);
-        }
-        this.classList.toggle('empty', this.items.length === 0 && this.htmlItems.length === 0);
+        this.classList.toggle('empty', this.items.length === 0);
       },   
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
         // unexpand all
         this.itterateItems(function(item){
           item.expanded = false;
+          item.checkIfActive();
         });
 
         if (this.expanded) {
@@ -95,6 +97,7 @@
           else this.top = 0;
           this.fire('floating-submenu-expanded', this);
         }
+        Platform.flush();
       },
       topChanged: function() {
         this.style.top = this.top + 'px';
