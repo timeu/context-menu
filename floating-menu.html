@@ -248,13 +248,14 @@
           if (typeof action == 'function') action.apply(null, args);
           if (typeof action == 'string') action = invokeFunction(window, action, args);
 
-          if (scope.action || this.$.submenu.items.length === 0) scope.fire('floating-menu-item-clicked', scope);
+          if (scope.action || scope.$.submenu.items.length === 0) scope.fire('floating-menu-item-clicked', scope);
         };
         
         this.addEventListener('click', onClick);
-        this.addEventListener('pointerup', function(event) {
-          if (event.pointerType == "mouse") onClick(event);
-        });
+        
+        // this.addEventListener('pointerup', function(event) {
+        //   if (event.pointerType == "mouse") onClick(event);
+        // });
 
         // right clipping
         this.addEventListener('floating-submenu-expanded', function(event){
