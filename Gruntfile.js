@@ -31,6 +31,7 @@
         },
         demo: {
           files: [
+            {src: 'LICENSE', dest: 'dist/LICENSE'},
             {src: 'dist/floating-menu.html', dest: 'demo/floating-menu.html'},
             {src: 'index.html', dest: 'demo/index.html'}
           ]
