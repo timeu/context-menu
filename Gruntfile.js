@@ -35,7 +35,7 @@
             {src: 'dist/floating-menu.html', dest: 'demo/floating-menu.html'},
             {src: 'floating-menu-screen-capture.gif', dest: 'demo/floating-menu-screen-capture.gif'},
             {src: 'index.html', dest: 'demo/index.html'},
-            {src: 'polymer', dest: 'demo/polymer'}
+            {src: 'polymer/**', dest: 'demo/'}
           ]
         }
       },
