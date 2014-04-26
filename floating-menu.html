@@ -18,26 +18,19 @@
   </template>
   <script>
   (function(){
-
     var veil = document.createElement('floating-menu-veil');
     veil.id = 'floating-menu-veil';
     document.body.appendChild(veil);
-
     Polymer('floating-menu-veil', {
       ready: function() {
-
         var scope = this;
-
-        this.setAttribute('touch-action', 'none');
         this.setAttribute( 'oncontextmenu', 'return false');
-
         window.addEventListener('floating-menu-expanded', function(){
           scope.classList.toggle('visible', true);
         });
         window.addEventListener('floating-menu-collapsed', function(){
           scope.classList.toggle('visible', false);
         });
-
       }
     });
   })();
@@ -94,9 +87,38 @@
       ready: function() {
 
         var scope = this;
-        
-        this.setAttribute('touch-action', 'none');
-        this.setAttribute('oncontextmenu', 'return false');
+
+        var x = 0, y = 0, d = 0, tempD;
+        var expandTimeout = {};
+
+        this.expandItem = function(item) {
+          item.expanded = true;
+          expandTimeout.cleared = true;
+        };
+        this.updatePointerVelocity = function(event) {
+          event.preventDefault();
+          tempD = Math.abs(event.clientY - y)/2 - (event.clientX - x);
+          d = tempD;//(d*2 + tempD) / 3;
+          x = event.clientX;
+          y = event.clientY;
+        };
+        this.nudgeUp = function() {
+          var rect = this.getBoundingClientRect();
+          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight;
+          if (bottomDist > 0) this.top = - bottomDist;
+          else this.top = 0;
+        };
+        this.iterateItems = function( callback ) {
+          for (var i = this.items.length; i--;) callback(this.items[i]);
+          this.classList.toggle('empty', this.items.length === 0);
+        };
+        this.resetItems = function() {
+          this.iterateItems(function(item){
+            item.expanded = false;
+            item.checkIfActive();
+            item.listen = scope.expanded;
+          });
+        };
 
         //TODO detach
         scope.items = [];
@@ -108,68 +130,47 @@
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation();
           // unexpand all except the one just expanded
-          scope.itterateItems(function(item){
+          scope.iterateItems(function(item){
             if (item != event.detail) {
               item.expanded = false;
             }
           });
         });
 
-        var x = 0, y = 0, d = 0, tempD;
-        var expandTimeout = {};
-
-        this.addEventListener('pointermove', function(event){
-          tempD = Math.abs(event.clientY - y)/2 - (event.clientX - x);
-          d = (d*2 + tempD) / 3;
-          x = event.clientX;
-          y = event.clientY;
-        });
-
         this.addEventListener('floating-item-hovered', function(event){
           clearTimeout(expandTimeout);
           var noneSelected = true;
-          scope.itterateItems(function(item){
+          scope.iterateItems(function(item){
             if (item != event.detail && item.expanded) {
               noneSelected = false;
             }
           });
-
-          if (d > 0 || event.detail.pointerEvent.pointerType != "mouse" || noneSelected) {
-            expandSubmenu(event.detail);        
+          if (d > 0 || noneSelected) {
+            this.expandItem(event.detail);        
           } else {
             expandTimeout.cleared = false;
-            expandTimeout = setTimeout(function(){expandSubmenu(event.detail);}, HOLD_TIME);
+            expandTimeout = setTimeout(function(){scope.expandItem(event.detail);}, HOLD_TIME);
           }
         });
 
-        var expandSubmenu = function(node) {
-          node.expanded = true;
-          expandTimeout.cleared = true;
-          Platform.flush();
-        };
-
       },
-      itterateItems: function( callback ) {
-        for (var i = 0; i < this.items.length; i++ ){
-          callback(this.items[i]);
-        }
-        this.classList.toggle('empty', this.items.length === 0);
-      },   
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
-        // unexpand all
-        this.itterateItems(function(item){
-          item.expanded = false;
-          item.checkIfActive();
-        });
+
+        this.resetItems();
 
         if (this.expanded) {
-          // bottom clipping
-          var rect = this.getBoundingClientRect();
-          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight;
-          if (bottomDist > 0) this.top = - bottomDist;
-          else this.top = 0;
+          this.nudgeUp();
+
+          this.addEventListener('mousemove', this.updatePointerVelocity);
+          this.addEventListener('touchmove', this.updatePointerVelocity);
+
           this.fire('floating-submenu-expanded', this);
+        } else {
+          this.removeEventListener('mousemove', this.updatePointerVelocity);
+          this.removeEventListener('touchmove', this.updatePointerVelocity);
+
+          this.fire('floating-submenu-collapsed', this);
         }
         Platform.flush();
       },
@@ -196,8 +197,6 @@
 }
 :host(.expanded) {
   background: #69F;
-}
-:host(:hover) {
   color: #fff;
 }</style>
     <floating-submenu id="submenu" options="{{options}}" expanded="{{expanded}}"><content></content></floating-submenu>
@@ -225,20 +224,18 @@
       arguments: undefined,
       expanded: false,
       options: [],
-      attached: function() {
+      ready: function() {
         var scope = this;
 
-        this.addEventListener('pointerover', function(event) {  
-          event.stopPropagation();  
+        this.hover = function(event) {
+          // event.preventDefault();
+          // event.stopPropagation();
           scope.pointerEvent = event;
           scope.fire('floating-item-hovered', scope);
-        });
-
-
-
-        var onClick = function(event) {
+        };
+        this.fireAction = function(event) {
+          event.preventDefault();
           event.stopPropagation();
-          
           var args = scope.arguments;
           var action = scope.action;
 
@@ -248,17 +245,9 @@
           if (typeof action == 'function') action.apply(null, args);
           if (typeof action == 'string') action = invokeFunction(window, action, args);
 
-          if (scope.action || scope.$.submenu.items.length === 0) scope.fire('floating-menu-item-clicked', scope);
+          this.fire('floating-menu-action-fired', this);
         };
-        
-        this.addEventListener('click', onClick);
-        
-        // this.addEventListener('pointerup', function(event) {
-        //   if (event.pointerType == "mouse") onClick(event);
-        // });
-
-        // right clipping
-        this.addEventListener('floating-submenu-expanded', function(event){
+        this.nudgeLeft = function(event) {
           event.stopPropagation();
           var rect = scope.getBoundingClientRect();
           var submenuRect = scope.$.submenu.getBoundingClientRect();
@@ -269,8 +258,10 @@
             scope.$.submenu.style.left = '100%';
           }
           Platform.flush();
-        });
-
+        };
+      },
+      attached: function() {
+        var scope = this;
         setTimeout(function(){
           scope.fire('floating-menu-item-attached', scope);
         }, 1);
@@ -287,10 +278,39 @@
       checkIfActive: function() {
         this.classList.toggle('active', this.action || this.options.length || this.$.submenu.items.length);
       },
+      listenChanged: function() {
+        // TODO: test
+        if (this.listen) {
+          if (this.action || this.$.submenu.items.length === 0) {
+            this.addEventListener('click', this.fireAction);
+            this.addEventListener('touchend', this.fireAction);
+          }
+
+          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
+
+          this.addEventListener('mouseover', this.hover);
+          this.addEventListener('touchstart', this.hover);
+          this.addEventListener('pointermove', this.hover);
+        } else {
+          this.removeEventListener('click', this.fireAction);
+          this.removeEventListener('touchend', this.fireAction);
+
+          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
+
+          this.removeEventListener('mouseover', this.hover);
+          this.removeEventListener('touchstart', this.hover);
+          this.removeEventListener('pointermove', this.hover);
+        }
+      },
       expandedChanged: function() {
-        var scope = this;
         this.classList.toggle('expanded', this.expanded);
-        if (this.expanded) this.fire('floating-item-expanded', this);
+
+        if (this.expanded) {
+          this.fire('floating-item-expanded', this);
+        } else {
+          this.fire('floating-item-collapsed', this);
+        }
+
         Platform.flush();
       }
     });
@@ -328,53 +348,47 @@
 
     var HOLD_TIME = 250;
     var MARGIN = 8;
+    var timeout;
 
     Polymer('floating-menu', {
       expanded: false,
       ready: function() {
-
         var scope = this;
 
-        var timeout;
-        
-        this.veil = document.querySelector('#floating-menu-veil');
-
-        // menu-closing events
-        this.veil.addEventListener('pointerover', function(event){
+        this.collapse = function() {
+          event.preventDefault();
+          event.stopPropagation();
+          scope.expanded = false;
+        };
+        this.collapseLater = function() {
+          event.preventDefault();
+          event.stopPropagation();
           timeout = setTimeout(function(){
             scope.expanded = false;
           }, HOLD_TIME);
-        });
-        this.veil.addEventListener('pointerdown', function(event){
-          scope.expanded = false;
-        });
-        window.addEventListener('scroll', function(event){
-          scope.expanded = false;
-        });
-        this.addEventListener('floating-menu-item-clicked', function(event){
-          scope.expanded = false;
-        });
-
-        this.addEventListener('pointermove', function(event){
-          clearTimeout(timeout);
-        });
-
-        // right clipping
-        this.addEventListener('floating-submenu-expanded', function(event){
+        };
+        this.cancelCollapse = function () {
+          event.preventDefault();
           event.stopPropagation();
-          var rect = scope.getBoundingClientRect();
-          var submenuRect = scope.$.submenu.getBoundingClientRect();
-          var rightDist = (submenuRect.right+MARGIN) - window.innerWidth; 
-          if (rightDist > 0) scope.style.left = rect.left - rightDist + 'px';
-        });
-
+          clearTimeout(timeout);
+        };
         this.expand = function(event) {
           event.preventDefault();
+          event.stopPropagation();
           scope.expanded = true;
           scope.style.top = event.clientY - 8 + "px";
           scope.style.left = event.clientX - 8 + "px";
           clearTimeout(timeout);
         };
+        this.nudgeLeft = function(event) {
+          event.stopPropagation();
+          var rect = scope.getBoundingClientRect();
+          var submenuRect = scope.$.submenu.getBoundingClientRect();
+          var rightDist = (submenuRect.right+MARGIN) - window.innerWidth; 
+          if (rightDist > 0) scope.style.left = rect.left - rightDist + 'px';
+        };
+
+        this.veil = document.querySelector('#floating-menu-veil');        
 
         document.addEventListener('contextmenu', this.expand);
       },
@@ -384,11 +398,29 @@
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
-        if (this.expanded === true) {
+
+        if (this.expanded) {
+          this.veil.addEventListener('mouseover', this.collapseLater);
+          this.veil.addEventListener('mousedown', this.collapse);
+          this.veil.addEventListener('touchstart', this.collapse);
+          window.addEventListener('scroll', this.collapse);
+          this.addEventListener('floating-menu-action-fired', this.collapse);
+          this.addEventListener('pointermove', this.cancelCollapse);
+          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
+
           this.fire('floating-menu-expanded', this);
         } else {
+          this.veil.removeEventListener('mouseover', this.collapseLater);
+          this.veil.removeEventListener('mousedown', this.collapse);
+          this.veil.removeEventListener('touchstart', this.collapse);
+          window.removeEventListener('scroll', this.collapse);
+          this.removeEventListener('floating-menu-action-fired', this.collapse);
+          this.removeEventListener('pointermove', this.cancelCollapse);
+          this.removeEventListener('floating-submenu-expanded', this.nudgeLeft);
+        
           this.fire('floating-menu-collapsed', this);
         }
+
         Platform.flush();
       }
     });
