@@ -12,7 +12,5 @@
 }
 :host(.expanded) {
   background: #69F;
-}
-:host(:hover) {
   color: #fff;
 }

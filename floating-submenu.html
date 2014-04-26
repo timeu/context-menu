@@ -20,9 +20,38 @@
       ready: function() {
 
         var scope = this;
-        
-        this.setAttribute('touch-action', 'none');
-        this.setAttribute('oncontextmenu', 'return false');
+
+        var x = 0, y = 0, d = 0, tempD;
+        var expandTimeout = {};
+
+        this.expandItem = function(item) {
+          item.expanded = true;
+          expandTimeout.cleared = true;
+        };
+        this.updatePointerVelocity = function(event) {
+          event.preventDefault();
+          tempD = Math.abs(event.clientY - y)/2 - (event.clientX - x);
+          d = tempD;//(d*2 + tempD) / 3;
+          x = event.clientX;
+          y = event.clientY;
+        };
+        this.nudgeUp = function() {
+          var rect = this.getBoundingClientRect();
+          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight;
+          if (bottomDist > 0) this.top = - bottomDist;
+          else this.top = 0;
+        };
+        this.iterateItems = function( callback ) {
+          for (var i = this.items.length; i--;) callback(this.items[i]);
+          this.classList.toggle('empty', this.items.length === 0);
+        };
+        this.resetItems = function() {
+          this.iterateItems(function(item){
+            item.expanded = false;
+            item.checkIfActive();
+            item.listen = scope.expanded;
+          });
+        };
 
         //TODO detach
         scope.items = [];
@@ -34,68 +63,47 @@
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation();
           // unexpand all except the one just expanded
-          scope.itterateItems(function(item){
+          scope.iterateItems(function(item){
             if (item != event.detail) {
               item.expanded = false;
             }
           });
         });
 
-        var x = 0, y = 0, d = 0, tempD;
-        var expandTimeout = {};
-
-        this.addEventListener('pointermove', function(event){
-          tempD = Math.abs(event.clientY - y)/2 - (event.clientX - x);
-          d = (d*2 + tempD) / 3;
-          x = event.clientX;
-          y = event.clientY;
-        });
-
         this.addEventListener('floating-item-hovered', function(event){
           clearTimeout(expandTimeout);
           var noneSelected = true;
-          scope.itterateItems(function(item){
+          scope.iterateItems(function(item){
             if (item != event.detail && item.expanded) {
               noneSelected = false;
             }
           });
-
-          if (d > 0 || event.detail.pointerEvent.pointerType != "mouse" || noneSelected) {
-            expandSubmenu(event.detail);        
+          if (d > 0 || noneSelected) {
+            this.expandItem(event.detail);        
           } else {
             expandTimeout.cleared = false;
-            expandTimeout = setTimeout(function(){expandSubmenu(event.detail);}, HOLD_TIME);
+            expandTimeout = setTimeout(function(){scope.expandItem(event.detail);}, HOLD_TIME);
           }
         });
 
-        var expandSubmenu = function(node) {
-          node.expanded = true;
-          expandTimeout.cleared = true;
-          Platform.flush();
-        };
-
       },
-      itterateItems: function( callback ) {
-        for (var i = 0; i < this.items.length; i++ ){
-          callback(this.items[i]);
-        }
-        this.classList.toggle('empty', this.items.length === 0);
-      },   
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
-        // unexpand all
-        this.itterateItems(function(item){
-          item.expanded = false;
-          item.checkIfActive();
-        });
+
+        this.resetItems();
 
         if (this.expanded) {
-          // bottom clipping
-          var rect = this.getBoundingClientRect();
-          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight;
-          if (bottomDist > 0) this.top = - bottomDist;
-          else this.top = 0;
+          this.nudgeUp();
+
+          this.addEventListener('mousemove', this.updatePointerVelocity);
+          this.addEventListener('touchmove', this.updatePointerVelocity);
+
           this.fire('floating-submenu-expanded', this);
+        } else {
+          this.removeEventListener('mousemove', this.updatePointerVelocity);
+          this.removeEventListener('touchmove', this.updatePointerVelocity);
+
+          this.fire('floating-submenu-collapsed', this);
         }
         Platform.flush();
       },

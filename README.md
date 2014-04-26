@@ -1,4 +1,4 @@
-#floating-menu
+#top-menu
 ![floating menu](https://raw.github.com/arodic/floating-menu/gh-pages/floating-menu-screen-capture.gif)
 
 ###Summary

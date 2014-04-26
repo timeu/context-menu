@@ -14,53 +14,47 @@
 
     var HOLD_TIME = 250;
     var MARGIN = 8;
+    var timeout;
 
     Polymer('floating-menu', {
       expanded: false,
       ready: function() {
-
         var scope = this;
 
-        var timeout;
-        
-        this.veil = document.querySelector('#floating-menu-veil');
-
-        // menu-closing events
-        this.veil.addEventListener('pointerover', function(event){
+        this.collapse = function() {
+          event.preventDefault();
+          event.stopPropagation();
+          scope.expanded = false;
+        };
+        this.collapseLater = function() {
+          event.preventDefault();
+          event.stopPropagation();
           timeout = setTimeout(function(){
             scope.expanded = false;
           }, HOLD_TIME);
-        });
-        this.veil.addEventListener('pointerdown', function(event){
-          scope.expanded = false;
-        });
-        window.addEventListener('scroll', function(event){
-          scope.expanded = false;
-        });
-        this.addEventListener('floating-menu-item-clicked', function(event){
-          scope.expanded = false;
-        });
-
-        this.addEventListener('pointermove', function(event){
-          clearTimeout(timeout);
-        });
-
-        // right clipping
-        this.addEventListener('floating-submenu-expanded', function(event){
+        };
+        this.cancelCollapse = function () {
+          event.preventDefault();
           event.stopPropagation();
-          var rect = scope.getBoundingClientRect();
-          var submenuRect = scope.$.submenu.getBoundingClientRect();
-          var rightDist = (submenuRect.right+MARGIN) - window.innerWidth; 
-          if (rightDist > 0) scope.style.left = rect.left - rightDist + 'px';
-        });
-
+          clearTimeout(timeout);
+        };
         this.expand = function(event) {
           event.preventDefault();
+          event.stopPropagation();
           scope.expanded = true;
           scope.style.top = event.clientY - 8 + "px";
           scope.style.left = event.clientX - 8 + "px";
           clearTimeout(timeout);
         };
+        this.nudgeLeft = function(event) {
+          event.stopPropagation();
+          var rect = scope.getBoundingClientRect();
+          var submenuRect = scope.$.submenu.getBoundingClientRect();
+          var rightDist = (submenuRect.right+MARGIN) - window.innerWidth; 
+          if (rightDist > 0) scope.style.left = rect.left - rightDist + 'px';
+        };
+
+        this.veil = document.querySelector('#floating-menu-veil');        
 
         document.addEventListener('contextmenu', this.expand);
       },
@@ -70,11 +64,29 @@
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
-        if (this.expanded === true) {
+
+        if (this.expanded) {
+          this.veil.addEventListener('mouseover', this.collapseLater);
+          this.veil.addEventListener('mousedown', this.collapse);
+          this.veil.addEventListener('touchstart', this.collapse);
+          window.addEventListener('scroll', this.collapse);
+          this.addEventListener('floating-menu-action-fired', this.collapse);
+          this.addEventListener('pointermove', this.cancelCollapse);
+          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
+
           this.fire('floating-menu-expanded', this);
         } else {
+          this.veil.removeEventListener('mouseover', this.collapseLater);
+          this.veil.removeEventListener('mousedown', this.collapse);
+          this.veil.removeEventListener('touchstart', this.collapse);
+          window.removeEventListener('scroll', this.collapse);
+          this.removeEventListener('floating-menu-action-fired', this.collapse);
+          this.removeEventListener('pointermove', this.cancelCollapse);
+          this.removeEventListener('floating-submenu-expanded', this.nudgeLeft);
+        
           this.fire('floating-menu-collapsed', this);
         }
+
         Platform.flush();
       }
     });

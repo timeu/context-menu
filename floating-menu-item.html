@@ -26,20 +26,18 @@
       arguments: undefined,
       expanded: false,
       options: [],
-      attached: function() {
+      ready: function() {
         var scope = this;
 
-        this.addEventListener('pointerover', function(event) {  
-          event.stopPropagation();  
+        this.hover = function(event) {
+          // event.preventDefault();
+          // event.stopPropagation();
           scope.pointerEvent = event;
           scope.fire('floating-item-hovered', scope);
-        });
-
-
-
-        var onClick = function(event) {
+        };
+        this.fireAction = function(event) {
+          event.preventDefault();
           event.stopPropagation();
-          
           var args = scope.arguments;
           var action = scope.action;
 
@@ -49,17 +47,9 @@
           if (typeof action == 'function') action.apply(null, args);
           if (typeof action == 'string') action = invokeFunction(window, action, args);
 
-          if (scope.action || scope.$.submenu.items.length === 0) scope.fire('floating-menu-item-clicked', scope);
+          this.fire('floating-menu-action-fired', this);
         };
-        
-        this.addEventListener('click', onClick);
-        
-        // this.addEventListener('pointerup', function(event) {
-        //   if (event.pointerType == "mouse") onClick(event);
-        // });
-
-        // right clipping
-        this.addEventListener('floating-submenu-expanded', function(event){
+        this.nudgeLeft = function(event) {
           event.stopPropagation();
           var rect = scope.getBoundingClientRect();
           var submenuRect = scope.$.submenu.getBoundingClientRect();
@@ -70,8 +60,10 @@
             scope.$.submenu.style.left = '100%';
           }
           Platform.flush();
-        });
-
+        };
+      },
+      attached: function() {
+        var scope = this;
         setTimeout(function(){
           scope.fire('floating-menu-item-attached', scope);
         }, 1);
@@ -88,10 +80,39 @@
       checkIfActive: function() {
         this.classList.toggle('active', this.action || this.options.length || this.$.submenu.items.length);
       },
+      listenChanged: function() {
+        // TODO: test
+        if (this.listen) {
+          if (this.action || this.$.submenu.items.length === 0) {
+            this.addEventListener('click', this.fireAction);
+            this.addEventListener('touchend', this.fireAction);
+          }
+
+          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
+
+          this.addEventListener('mouseover', this.hover);
+          this.addEventListener('touchstart', this.hover);
+          this.addEventListener('pointermove', this.hover);
+        } else {
+          this.removeEventListener('click', this.fireAction);
+          this.removeEventListener('touchend', this.fireAction);
+
+          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
+
+          this.removeEventListener('mouseover', this.hover);
+          this.removeEventListener('touchstart', this.hover);
+          this.removeEventListener('pointermove', this.hover);
+        }
+      },
       expandedChanged: function() {
-        var scope = this;
         this.classList.toggle('expanded', this.expanded);
-        if (this.expanded) this.fire('floating-item-expanded', this);
+
+        if (this.expanded) {
+          this.fire('floating-item-expanded', this);
+        } else {
+          this.fire('floating-item-collapsed', this);
+        }
+
         Platform.flush();
       }
     });
