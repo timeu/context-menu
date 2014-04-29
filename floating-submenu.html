@@ -22,10 +22,10 @@
         var scope = this;
 
         this.nudge = function() {
+          // Todo: watch for scroll
           // nudge up
-          var bottomDist = (this.rect.bottom - this.top + MARGIN) - window.innerHeight;
+          var bottomDist = (this.rect.bottom + MARGIN) - window.innerHeight;
           if (bottomDist > 0) this.top = - bottomDist;
-          else this.top = 0;
           // nudge left
           var rightDist = (this.rect.right - this.left + MARGIN) - window.innerWidth;
           if (rightDist > 0 && this.offset === 0) this.left = - rightDist;
@@ -80,6 +80,7 @@
           this.fire('floating-submenu-expanded', this);
         } else {
           this.fire('floating-submenu-collapsed', this);
+          this.top = 0;
         }
       },
       topChanged: function() {
