@@ -222,10 +222,16 @@
         };
       },
       attached: function() {
-        this.fire('floating-menu-item-attached', this);
+        var scope = this;
+        setTimeout(function(){ // chromium bug?
+          scope.fire('floating-menu-item-attached', scope);
+        },1);
       },
       detached: function() {
-        this.fire('floating-menu-item-detached', this);
+        var scope = this;
+        setTimeout(function(){ // chromium bug?
+          this.fire('floating-menu-item-detached', this);
+        },1);
       },
       update: function() {
         var scope = this;
