@@ -1,7 +1,7 @@
-<polymer-element name="floating-menu-item" attributes="label action arguments expanded options">
+<polymer-element name="floating-menu-item" attributes="root label listen empty action arguments expanded options">
   <template>
     <link href="floating-menu-item.css" rel="stylesheet" type="text/css" />
-    <floating-submenu id="submenu" options="{{options}}" expanded="{{expanded}}"><content></content></floating-submenu>
+    <floating-submenu id="submenu" root="{{root}}"options="{{options}}" expanded="{{expanded}}"><content></content></floating-submenu>
     &nbsp;{{label}}&nbsp;
   </template>
   <script>
@@ -29,12 +29,6 @@
       ready: function() {
         var scope = this;
 
-        this.hover = function(event) {
-          // event.preventDefault();
-          // event.stopPropagation();
-          scope.pointerEvent = event;
-          scope.fire('floating-item-hovered', scope);
-        };
         this.fireAction = function(event) {
           event.preventDefault();
           event.stopPropagation();
@@ -49,74 +43,40 @@
 
           this.fire('floating-menu-action-fired', this);
         };
-        this.nudgeLeft = function(event) {
-          event.stopPropagation();
-          var rect = scope.getBoundingClientRect();
-          var submenuRect = scope.$.submenu.getBoundingClientRect();
-          var rightDist = (rect.right+submenuRect.width+MARGIN) - window.innerWidth; 
-          if (rightDist > 0) {
-            scope.$.submenu.style.left = - submenuRect.width + 'px';
-          } else {
-            scope.$.submenu.style.left = '100%';
-          }
-          Platform.flush();
-        };
       },
       attached: function() {
-        var scope = this;
-        setTimeout(function(){
-          scope.fire('floating-menu-item-attached', scope);
-        }, 1);
+        this.fire('floating-menu-item-attached', this);
       },
       detached: function() {
         this.fire('floating-menu-item-detached', this);
       },
-      actionChanged: function() {
-        this.checkIfActive();
-      },
-      optionsChanged: function() {
-        this.checkIfActive();
-      },
-      checkIfActive: function() {
+      update: function() {
+        var scope = this;
         this.classList.toggle('active', this.action || this.options.length || this.$.submenu.items.length);
+        setTimeout(function(){scope.rect = scope.getBoundingClientRect();},1);
       },
       listenChanged: function() {
-        // TODO: test
+        this.update();
         if (this.listen) {
           if (this.action || this.$.submenu.items.length === 0) {
             this.addEventListener('click', this.fireAction);
             this.addEventListener('touchend', this.fireAction);
           }
-
-          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
-
-          this.addEventListener('mouseover', this.hover);
-          this.addEventListener('touchstart', this.hover);
-          this.addEventListener('pointermove', this.hover);
         } else {
           this.removeEventListener('click', this.fireAction);
           this.removeEventListener('touchend', this.fireAction);
-
-          this.addEventListener('floating-submenu-expanded', this.nudgeLeft);
-
-          this.removeEventListener('mouseover', this.hover);
-          this.removeEventListener('touchstart', this.hover);
-          this.removeEventListener('pointermove', this.hover);
         }
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
-
         if (this.expanded) {
           this.fire('floating-item-expanded', this);
         } else {
           this.fire('floating-item-collapsed', this);
         }
-
-        Platform.flush();
       }
     });
 
   })();
   </script>
-</polymer-element>
+<!-- </polymer-element> -->

@@ -1,8 +1,8 @@
-<polymer-element name="floating-submenu" attributes="expanded options htmlOptions">
+<polymer-element name="floating-submenu" attributes="root expanded options">
   <template>
     <link href="floating-submenu.css" rel="stylesheet" type="text/css" />
-    <template repeat="{{options}}">
-      <floating-menu-item id="item" label="{{label}}" action="{{action}}" arguments="{{arguments}}" options="{{options}}">
+    <template repeat="{{option in options}}">
+      <floating-menu-item id="item" root="{{root}}" label="{{option.label}}" action="{{option.action}}" arguments="{{option.arguments}}" options="{{option.options}}">
       </floating-menu-item>
     </template>
     <content></content>
@@ -16,99 +16,77 @@
     Polymer('floating-submenu', {
       top: 0,
       left: 0,
+      offset: 0,
       expanded: false,
       ready: function() {
-
         var scope = this;
 
-        var x = 0, y = 0, d = 0, tempD;
-        var expandTimeout = {};
-
-        this.expandItem = function(item) {
-          item.expanded = true;
-          expandTimeout.cleared = true;
-        };
-        this.updatePointerVelocity = function(event) {
-          event.preventDefault();
-          tempD = Math.abs(event.clientY - y)/2 - (event.clientX - x);
-          d = tempD;//(d*2 + tempD) / 3;
-          x = event.clientX;
-          y = event.clientY;
-        };
-        this.nudgeUp = function() {
-          var rect = this.getBoundingClientRect();
-          var bottomDist = (rect.bottom-this.top+MARGIN) - window.innerHeight;
+        this.nudge = function() {
+          // nudge up
+          var bottomDist = (this.rect.bottom - this.top + MARGIN) - window.innerHeight;
           if (bottomDist > 0) this.top = - bottomDist;
           else this.top = 0;
-        };
-        this.iterateItems = function( callback ) {
-          for (var i = this.items.length; i--;) callback(this.items[i]);
-          this.classList.toggle('empty', this.items.length === 0);
-        };
-        this.resetItems = function() {
-          this.iterateItems(function(item){
-            item.expanded = false;
-            item.checkIfActive();
-            item.listen = scope.expanded;
-          });
+          // nudge left
+          var rightDist = (this.rect.right - this.left + MARGIN) - window.innerWidth;
+          if (rightDist > 0 && this.offset === 0) this.left = - rightDist;
+          else if (rightDist > - this.offset) this.left = - this.rect.width;
+          else this.left = this.offset;
         };
 
-        //TODO detach
+        this.resetItems = function() {
+          for (var i = this.items.length; i--;){
+            this.items[i].expanded = false;
+            this.items[i].update();
+          }
+        };
+
+        this.addEventListener('floating-submenu-expanded', function(event){
+          scope.rect = scope.getBoundingClientRect();
+          if (scope == event.detail) {
+            event.detail.nudge();
+            return;
+          }
+          event.stopPropagation();
+          event.detail.offset = scope.rect.width - 1;
+          event.detail.nudge();
+          this.rect = this.getBoundingClientRect();
+        });
+
         scope.items = [];
         this.addEventListener('floating-menu-item-attached', function(event){
           event.stopPropagation();
           scope.items.push(event.detail);
+          event.detail.bind('root', new PathObserver(scope, 'root'));
+          event.detail.bind('listen', new PathObserver(scope, 'expanded'));
         });
 
         this.addEventListener('floating-item-expanded', function(event){
           event.stopPropagation();
           // unexpand all except the one just expanded
-          scope.iterateItems(function(item){
-            if (item != event.detail) {
-              item.expanded = false;
+          for (var i = this.items.length; i--;){
+            if (this.items[i] != event.detail) {
+              this.items[i].expanded = false;
             }
-          });
-        });
-
-        this.addEventListener('floating-item-hovered', function(event){
-          clearTimeout(expandTimeout);
-          var noneSelected = true;
-          scope.iterateItems(function(item){
-            if (item != event.detail && item.expanded) {
-              noneSelected = false;
-            }
-          });
-          if (d > 0 || noneSelected) {
-            this.expandItem(event.detail);        
-          } else {
-            expandTimeout.cleared = false;
-            expandTimeout = setTimeout(function(){scope.expandItem(event.detail);}, HOLD_TIME);
           }
         });
 
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
-
-        this.resetItems();
+        this.classList.toggle('empty', this.items.length === 0);
 
         if (this.expanded) {
-          this.nudgeUp();
-
-          this.addEventListener('mousemove', this.updatePointerVelocity);
-          this.addEventListener('touchmove', this.updatePointerVelocity);
-
+          this.resetItems();
           this.fire('floating-submenu-expanded', this);
         } else {
-          this.removeEventListener('mousemove', this.updatePointerVelocity);
-          this.removeEventListener('touchmove', this.updatePointerVelocity);
-
           this.fire('floating-submenu-collapsed', this);
         }
-        Platform.flush();
       },
       topChanged: function() {
         this.style.top = this.top + 'px';
+      },
+      leftChanged: function() {
+        this.style.left = this.left + 'px';
       }
     });
   })();

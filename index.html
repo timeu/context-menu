@@ -15,7 +15,7 @@
     }
     body{
       background: #333;
-      margin: 48px;
+      padding: 48px;
       font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       color: white;
     }
@@ -46,7 +46,7 @@
   <script type="text/javascript">
     window.addEventListener('polymer-ready', function() {
       
-      var menu = document.querySelector("#floating-menu");
+      window.menu = document.querySelector("#floating-menu");
 
       menu.options = [
         { label: "Options", options: [
@@ -66,13 +66,13 @@
             { label: "suboption9" }
           ] } 
         ] },
-        { label: "Deep", options: [
-          { label: "And", options: [
-            { label: "Very", options: [
-              { label: "Very", options: [
-                { label: "Long", options: [
-                  { label: "Submemenu", options: [
-                    { label: "Nesting" }
+        { label: "Suboptions", options: [
+          { label: "Suboption1", options: [
+            { label: "Suboption2", options: [
+              { label: "Suboption3", options: [
+                { label: "Suboption4", options: [
+                  { label: "Suboption5", options: [
+                    { label: "Suboption6" }
                   ] } 
                 ] } 
               ] } 
