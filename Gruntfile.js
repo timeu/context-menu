@@ -65,11 +65,7 @@
     grunt.registerTask('dist', [
       'vulcanize:dist',
       'copy:dist',
-      'gh-pages:dist'
-    ]);
-
-    grunt.registerTask('demo', [
-      'vulcanize:dist',
+      'gh-pages:dist',
       'copy:demo',
       'gh-pages:demo'
     ]);
@@ -77,7 +73,6 @@
     grunt.registerTask('default', ['dist']);
 
     grunt.file.mkdir( 'dist' );
-    grunt.file.mkdir( 'demo' );
 
   };
 
