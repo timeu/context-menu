@@ -322,8 +322,10 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
   visibility: hidden;
   position: fixed;
   z-index: 1000000;
-  background: red;
   cursor: default;
+}
+:host(.top) {
+  
 }
 :host(.expanded) {
   visibility: visible;
