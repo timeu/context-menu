@@ -7,10 +7,8 @@
     grunt.loadNpmTasks('grunt-vulcanize');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-gh-pages');
-    // grunt.loadNpmTasks('grunt-shell');
 
     grunt.initConfig({
-
 
       vulcanize: {
         dist: {
