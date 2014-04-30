@@ -36,7 +36,7 @@
   })();
   </script>
 </polymer-element>
-<polymer-element name="floating-submenu" attributes="root expanded options" assetpath="../">
+<polymer-element name="floating-submenu" attributes="root expanded options direction" assetpath="../">
   <template>
     <style type="text/css">:host {
   user-select: none;
@@ -77,27 +77,33 @@
   <script>
   (function() {
 
-    var HOLD_TIME = 250;
     var MARGIN = 8;
     
     Polymer('floating-submenu', {
       top: 0,
       left: 0,
-      offset: 0,
+      parentWidth: 0,
+      parentHeight: 0,
       expanded: false,
+      direction: 'right',
       ready: function() {
         var scope = this;
 
         this.nudge = function() {
           // Todo: watch for scroll
-          // nudge up
-          var bottomDist = (this.rect.bottom + MARGIN) - window.innerHeight;
-          if (bottomDist > 0) this.top = - bottomDist;
-          // nudge left
-          var rightDist = (this.rect.right - this.left + MARGIN) - window.innerWidth;
-          if (rightDist > 0 && this.offset === 0) this.left = - rightDist;
-          else if (rightDist > - this.offset) this.left = - this.rect.width;
-          else this.left = this.offset;
+          if (this.direction == 'right') {
+            // nudge up
+            var bottomDist = (this.rect.bottom + MARGIN) - window.innerHeight;
+            if (bottomDist > 0) this.top = - bottomDist;
+            // nudge left
+            var rightDist = (this.rect.right - this.left) - window.innerWidth;
+            if (rightDist > 0 && this.parentWidth === 0) this.left = - rightDist;
+            else if (rightDist > - this.parentWidth) this.left = - this.rect.width;
+            else this.left = this.parentWidth;
+          } else if (this.direction == 'down') {
+            this.top = this.parentHeight;
+          }
+          
         };
 
         this.resetItems = function() {
@@ -114,7 +120,6 @@
             return;
           }
           event.stopPropagation();
-          event.detail.offset = scope.rect.width - 1;
           event.detail.nudge();
           this.rect = this.getBoundingClientRect();
         });
@@ -142,8 +147,8 @@
         this.classList.toggle('expanded', this.expanded);
         this.classList.toggle('empty', this.items.length === 0);
 
+        this.resetItems();
         if (this.expanded) {
-          this.resetItems();
           this.fire('floating-submenu-expanded', this);
         } else {
           this.fire('floating-submenu-collapsed', this);
@@ -184,8 +189,6 @@
   <script>
   (function() {
 
-    var MARGIN = 8;
-
     function invokeFunction(obj, path, args) {
       var idx = path.indexOf('.');
       if (idx < 0) {
@@ -203,6 +206,7 @@
       arguments: undefined,
       expanded: false,
       options: [],
+      holdTime: 250,
       ready: function() {
         var scope = this;
 
@@ -236,7 +240,11 @@
       update: function() {
         var scope = this;
         this.classList.toggle('active', this.action || this.options.length || this.$.submenu.items.length);
-        setTimeout(function(){scope.rect = scope.getBoundingClientRect();},1);
+        setTimeout(function(){
+          scope.rect = scope.getBoundingClientRect();
+          scope.$.submenu.parentHeight = scope.rect.height;
+          scope.$.submenu.parentWidth = scope.rect.width;
+        },1);
       },
       listenChanged: function() {
         this.update();
@@ -262,7 +270,7 @@
 
   })();
   </script>
-<!-- </polymer-element> --></polymer-element>
+</polymer-element>
 
 <!--
 Custom element providing a floating menu with a simple API. It is designed and polished for fast and simple user experience on both desktop and mobile.
@@ -300,7 +308,7 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
 @url https://github.com/arodic/floating-menu
 -->
 
-<polymer-element name="floating-menu" attributes="options" assetpath="../">
+<polymer-element name="floating-menu" attributes="options parent" assetpath="../">
   <template>
     <style type="text/css">:host {
   user-select: none;
@@ -319,6 +327,11 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
 }
 :host(.expanded) {
   visibility: visible;
+}
+:host(.topmenu) {
+  visibility: visible;
+  top: 0;
+  left: 0;
 }</style>
     <floating-submenu id="submenu" root="{{}}" expanded="{{expanded}}" options="{{options}}">
       <content></content>
@@ -327,8 +340,6 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
   <script>
   (function() {
 
-    var HOLD_TIME = 250;
-    var MARGIN = 8;
     var timeout;
 
     Polymer('floating-menu', {
@@ -352,11 +363,19 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
        * @attribute options
        * @type list of objects
        */
+
+      /**
+       * The `parent` (optional attribute) DOM element to attach the mouse/touch listener to.
+       * Default is document
+
+       * @attribute parent
+       * @type DOM object
+       */
+
       options: undefined,
+      holdTime: 250,
       ready: function() {
         var scope = this;
-
-        this.expanded = false;
 
         this.setAttribute( 'oncontextmenu', 'return false');
 
@@ -371,7 +390,7 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
           event.stopPropagation();
           timeout = setTimeout(function(){
             scope.expanded = false;
-          }, HOLD_TIME);
+          }, scope.holdTime);
         };
         this.cancelCollapse = function (event) {
           event.preventDefault();
@@ -417,6 +436,9 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
         var expandTimeout = {};
         this._currentDepth = -1;
         this.hover = function(event){
+
+          scope.getItems(); // TODO: make this hapen only when items are changed
+
           clearTimeout(expandTimeout);
           event.preventDefault();
           event.stopPropagation();
@@ -441,7 +463,7 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
                   } else {
                     expandTimeout = setTimeout(function(){
                       scope._itemsMatrix[i][j].expanded = true;
-                    }, HOLD_TIME);
+                    }, scope._itemsMatrix[i][j].holdTime);
                   }
                   
                   scope._currentDepth = i;
@@ -454,14 +476,12 @@ Floating menus are very simple to make with just a bit of HTML, JavaScript and C
           scope._currentDepth = -1;
         };
 
-        this.veil = document.querySelector('#floating-menu-veil');     
+        this.veil = document.querySelector('#floating-menu-veil');
+        document.addEventListener('contextmenu', this.expand);
       },
-      attached: function() {
-        this._parentNode = this.parentNode;
-        this._parentNode.addEventListener('contextmenu', this.expand);
-      },
-      detached: function(event) {
-        this._parentNode.removeEventListener('contextmenu', this.expand);
+      parentChanged: function() {
+        document.removeEventListener('contextmenu', this.expand);
+        this.parent.addEventListener('contextmenu', this.expand);
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
