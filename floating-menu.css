@@ -18,3 +18,8 @@
 :host(.expanded) {
   visibility: visible;
 }
+:host(.topmenu) {
+  visibility: visible;
+  top: 0;
+  left: 0;
+}

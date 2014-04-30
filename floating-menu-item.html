@@ -7,8 +7,6 @@
   <script>
   (function() {
 
-    var MARGIN = 8;
-
     function invokeFunction(obj, path, args) {
       var idx = path.indexOf('.');
       if (idx < 0) {
@@ -26,6 +24,7 @@
       arguments: undefined,
       expanded: false,
       options: [],
+      holdTime: 250,
       ready: function() {
         var scope = this;
 
@@ -59,7 +58,11 @@
       update: function() {
         var scope = this;
         this.classList.toggle('active', this.action || this.options.length || this.$.submenu.items.length);
-        setTimeout(function(){scope.rect = scope.getBoundingClientRect();},1);
+        setTimeout(function(){
+          scope.rect = scope.getBoundingClientRect();
+          scope.$.submenu.parentHeight = scope.rect.height;
+          scope.$.submenu.parentWidth = scope.rect.width;
+        },1);
       },
       listenChanged: function() {
         this.update();
@@ -85,4 +88,4 @@
 
   })();
   </script>
-<!-- </polymer-element> -->
+</polymer-element>

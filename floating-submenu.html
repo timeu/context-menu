@@ -1,4 +1,4 @@
-<polymer-element name="floating-submenu" attributes="root expanded options">
+<polymer-element name="floating-submenu" attributes="root expanded options direction">
   <template>
     <link href="floating-submenu.css" rel="stylesheet" type="text/css" />
     <template repeat="{{option in options}}">
@@ -10,27 +10,33 @@
   <script>
   (function() {
 
-    var HOLD_TIME = 250;
     var MARGIN = 8;
     
     Polymer('floating-submenu', {
       top: 0,
       left: 0,
-      offset: 0,
+      parentWidth: 0,
+      parentHeight: 0,
       expanded: false,
+      direction: 'right',
       ready: function() {
         var scope = this;
 
         this.nudge = function() {
           // Todo: watch for scroll
-          // nudge up
-          var bottomDist = (this.rect.bottom + MARGIN) - window.innerHeight;
-          if (bottomDist > 0) this.top = - bottomDist;
-          // nudge left
-          var rightDist = (this.rect.right - this.left + MARGIN) - window.innerWidth;
-          if (rightDist > 0 && this.offset === 0) this.left = - rightDist;
-          else if (rightDist > - this.offset) this.left = - this.rect.width;
-          else this.left = this.offset;
+          if (this.direction == 'right') {
+            // nudge up
+            var bottomDist = (this.rect.bottom + MARGIN) - window.innerHeight;
+            if (bottomDist > 0) this.top = - bottomDist;
+            // nudge left
+            var rightDist = (this.rect.right - this.left) - window.innerWidth;
+            if (rightDist > 0 && this.parentWidth === 0) this.left = - rightDist;
+            else if (rightDist > - this.parentWidth) this.left = - this.rect.width;
+            else this.left = this.parentWidth;
+          } else if (this.direction == 'down') {
+            this.top = this.parentHeight;
+          }
+          
         };
 
         this.resetItems = function() {
@@ -47,7 +53,6 @@
             return;
           }
           event.stopPropagation();
-          event.detail.offset = scope.rect.width - 1;
           event.detail.nudge();
           this.rect = this.getBoundingClientRect();
         });
@@ -75,8 +80,8 @@
         this.classList.toggle('expanded', this.expanded);
         this.classList.toggle('empty', this.items.length === 0);
 
+        this.resetItems();
         if (this.expanded) {
-          this.resetItems();
           this.fire('floating-submenu-expanded', this);
         } else {
           this.fire('floating-submenu-collapsed', this);
