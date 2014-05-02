@@ -1,20 +1,20 @@
-Custom element providing a floating menu with a simple API. It is designed and polished for fast and simple user experience on both desktop and mobile.
+Custom element providing a context menu with a simple API. It is designed and polished for fast and simple user experience on both desktop and mobile.
 
 ##### Examples
 
-    <floating-menu options="{{menuOptions}}"></floating-menu>
+    <context-menu options="{{menuOptions}}"></context-menu>
 
-    <floating-menu>
-      <floating-menu-item label="HTML Item">
-        <floating-menu-item label="HTML Subitem1" action="console.log" arguments="1"></floating-menu-item>
-        <floating-menu-item label="HTML Subitem2" action="console.log" arguments="2"></floating-menu-item>
-        <floating-menu-item label="HTML Subitem3">
-          <floating-menu-item label="HTML Subitem4"></floating-menu-item>
-        </floating-menu-item>
-      </floating-menu-item>
-    </floating-menu>
+    <context-menu>
+      <context-menu-item label="HTML Item">
+        <context-menu-item label="HTML Subitem1" action="console.log" arguments="1"></context-menu-item>
+        <context-menu-item label="HTML Subitem2" action="console.log" arguments="2"></context-menu-item>
+        <context-menu-item label="HTML Subitem3">
+          <context-menu-item label="HTML Subitem4"></context-menu-item>
+        </context-menu-item>
+      </context-menu-item>
+    </context-menu>
 
-##### [Live Demo](http://aleksandarrodic.com/floating-menu/)
+##### [Live Demo](http://aleksandarrodic.com/context-menu/)
 
 ##### Features
 
@@ -27,9 +27,9 @@ Custom element providing a floating menu with a simple API. It is designed and p
 
 Floating menus are very simple to make with just a bit of HTML, JavaScript and CSS. However, most implementations don't work quite right when it comes to touch support, and user experience can be quite bad if a user has limited screen space or clumsy hands. In this implementation, I attempted to correct some of those problems and and package it in a reusable component that work well on desktop and mobile.
 
-The `floating-menu-expanded` event fires when the menu is expanded.
+The `context-menu-expanded` event fires when the menu is expanded.
  
-The `floating-menu-collapsed` event fires when the menu is collapsed.
+The `context-menu-collapsed` event fires when the menu is collapsed.
  
 The `options` attribute is a list of item objects.
 `{ label: "option", action: function(){}, arguments: [], options: [] }`
