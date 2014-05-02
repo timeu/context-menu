@@ -54,6 +54,10 @@ Requires nested menu as a sibling
       ready: function() {
         var scope = this;
 
+        scope.$.menu.$.submenu.parentHeight = 0;
+        scope.$.menu.$.submenu.parentWidth = 0;
+        scope.$.menu.$.submenu.style.position = "absolute";
+
         this.collapse = function(event) {
           event.preventDefault();
           event.stopPropagation();
@@ -67,6 +71,7 @@ Requires nested menu as a sibling
           scope.$.menu.updateItems();
           scope.style.top = event.clientY + 2 + "px";
           scope.style.left = event.clientX + 2 + "px";
+          scope.$.menu.$.submenu.nudge();
         };
 
         this.veil = document.querySelector('#nested-menu-veil');
