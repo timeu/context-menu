@@ -13,10 +13,13 @@
       vulcanize: {
         dist: {
           options: {
-            inline: true
+            inline: true,
+            "excludes": {
+              "imports": [ "nested-menu.html" ]
+            }
           },
           files: {
-            'dist/floating-menu.html': 'floating-menu.html'
+            'dist/context-menu.html': 'context-menu.html'
           }
         }
       },
@@ -31,8 +34,8 @@
         demo: {
           files: [
             {src: 'LICENSE', dest: 'demo/LICENSE'},
-            {src: 'dist/floating-menu.html', dest: 'demo/floating-menu.html'},
-            {src: 'floating-menu-screen-capture.gif', dest: 'demo/floating-menu-screen-capture.gif'},
+            {src: 'dist/context-menu.html', dest: 'demo/context-menu.html'},
+            {src: 'context-menu-screen-capture.gif', dest: 'demo/context-menu-screen-capture.gif'},
             {src: 'index.html', dest: 'demo/index.html'},
             {src: 'polymer/**', dest: 'demo/'}
           ]
