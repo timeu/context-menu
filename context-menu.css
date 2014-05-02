@@ -1,25 +1,11 @@
 :host {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  white-space:nowrap;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
   color: white;
   visibility: hidden;
   position: fixed;
   z-index: 1000000;
-  cursor: default;
-}
-:host(.top) {
-  
 }
 :host(.expanded) {
   visibility: visible;
-}
-:host(.topmenu) {
-  visibility: visible;
-  top: 0;
-  left: 0;
 }
