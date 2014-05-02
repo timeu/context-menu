@@ -61,14 +61,13 @@ Requires nested menu as a sibling
        * @attribute parent
        * @type DOM object
        */
-
-      options: undefined,
       ready: function() {
         var scope = this;
 
         this.collapse = function(event) {
           event.preventDefault();
           event.stopPropagation();
+          scope.$.menu.collapseItems();
           scope.expanded = false;
         };
         this.expand = function(event) {
