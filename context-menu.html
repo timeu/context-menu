@@ -1,0 +1,113 @@
+<link rel="import" href="../../nested-menu/nested-menu.html">
+
+<!--
+Alrternative version of [nested-menu](https://github.com/arodic/nested-menu) element.
+Works exactly like nested menu except its anchored to the context of the parent element.
+
+Requires nested menu as a sibling
+
+##### [Live Demo](http://aleksandarrodic.com/context-menu/)
+
+@element context-menu
+@blurb Custom element providing a context menu with a simple API
+@status alpha
+@url https://github.com/arodic/context-menu
+-->
+
+<polymer-element name="context-menu" attributes="options parent" assetpath="../">
+  <template>
+    <style type="text/css">:host {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: white;
+  visibility: hidden;
+  position: fixed;
+  z-index: 1000000;
+}
+:host(.expanded) {
+  visibility: visible;
+}</style>
+    <nested-menu id="menu" options="{{options}}">
+      <content></content>
+    </nested-menu>
+  </template>
+  <script>
+    Polymer('context-menu', {
+
+      /**
+       * The `context-menu-expanded` event fires when the menu is expanded.
+       * 
+       * @event context-menu-expanded
+       */
+
+      /**
+       * The `context-menu-collapsed` event fires when the menu is collapsed.
+       * 
+       * @event context-menu-collapsed
+       */
+
+      /**
+       * The `options` attribute is a list of item objects.
+       * { label: "option", action: function(){}, arguments: [], options: [] }
+
+       * @attribute options
+       * @type list of objects
+       */
+
+      /**
+       * The `parent` (optional attribute) DOM element to attach the mouse/touch listener to.
+       * Default is document
+
+       * @attribute parent
+       * @type DOM object
+       */
+
+      options: undefined,
+      ready: function() {
+        var scope = this;
+
+        this.collapse = function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          scope.expanded = false;
+          console.log( 'collapse' );
+        };
+        this.expand = function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          scope.expanded = true;
+          scope.style.top = event.clientY + 2 + "px";
+          scope.style.left = event.clientX + 2 + "px";
+        };
+
+        this.veil = document.querySelector('#nested-menu-veil');
+        console.log( this.veil );
+        document.addEventListener('contextmenu', this.expand);
+      },
+      parentChanged: function() {
+        document.removeEventListener('contextmenu', this.expand);
+        this.parent.addEventListener('contextmenu', this.expand);
+      },
+      expandedChanged: function() {
+        this.classList.toggle('expanded', this.expanded);
+        this.veil.classList.toggle('visible', this.expanded);
+        this.$.menu.updateItems();
+        if (this.expanded) {
+          this.veil.addEventListener('mousedown', this.collapse);
+          this.veil.addEventListener('touchstart', this.collapse);
+          window.addEventListener('scroll', this.collapse);
+          this.addEventListener('nested-menu-action-fired', this.collapse);
+
+          this.fire('context-menu-expanded', this);
+        } else {
+          this.veil.removeEventListener('mousedown', this.collapse);
+          this.veil.removeEventListener('touchstart', this.collapse);
+          window.removeEventListener('scroll', this.collapse);
+          this.removeEventListener('nested-menu-action-fired', this.collapse);
+
+          this.fire('context-menu-collapsed', this);
+        }
+      }
+    });
+  </script>
+</polymer-element>
