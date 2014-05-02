@@ -1,17 +1,17 @@
 {
-  "name": "floating-menu",
+  "name": "context-menu",
   "version": "0.0.1",
-  "description": "floating menu polymer element",
+  "description": "context menu polymer element",
   "main": "index.js",
   "scripts": {
     "test": ""
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/arodic/floating-menu.git"
+    "url": "https://github.com/arodic/context-menu.git"
   },
   "keywords": [
-    "floating",
+    "context",
     "menu",
     "polymer",
     "UI"
@@ -19,9 +19,9 @@
   "author": "arodic",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/arodic/floating-menu/issues"
+    "url": "https://github.com/arodic/context-menu/issues"
   },
-  "homepage": "https://github.com/arodic/floating-menu",
+  "homepage": "https://github.com/arodic/context-menu",
   "devDependencies": {
     "grunt-contrib-copy": "^0.5.0",
     "grunt-gh-pages": "^0.9.1",
