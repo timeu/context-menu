@@ -65,6 +65,7 @@ Requires nested menu as a sibling
           event.preventDefault();
           event.stopPropagation();
           scope.expanded = true;
+          scope.$.menu.updateItems();
           scope.style.top = event.clientY + 2 + "px";
           scope.style.left = event.clientX + 2 + "px";
         };
@@ -79,7 +80,6 @@ Requires nested menu as a sibling
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
         this.veil.classList.toggle('visible', this.expanded);
-        this.$.menu.updateItems();
         if (this.expanded) {
           this.veil.addEventListener('mousedown', this.collapse);
           this.veil.addEventListener('touchstart', this.collapse);
