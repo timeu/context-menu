@@ -5,13 +5,13 @@ Custom element providing a context menu with a simple API. It is designed and po
     <context-menu options="{{menuOptions}}"></context-menu>
 
     <context-menu>
-      <context-menu-item label="HTML Item">
-        <context-menu-item label="HTML Subitem1" action="console.log" arguments="1"></context-menu-item>
-        <context-menu-item label="HTML Subitem2" action="console.log" arguments="2"></context-menu-item>
-        <context-menu-item label="HTML Subitem3">
-          <context-menu-item label="HTML Subitem4"></context-menu-item>
-        </context-menu-item>
-      </context-menu-item>
+      <nested-menu-item label="HTML Item">
+        <nested-menu-item label="HTML Subitem1" action="console.log" arguments="1"></nested-menu-item>
+        <nested-menu-item label="HTML Subitem2" action="console.log" arguments="2"></nested-menu-item>
+        <nested-menu-item label="HTML Subitem3">
+          <nested-menu-item label="HTML Subitem4"></nested-menu-item>
+        </nested-menu-item>
+      </nested-menu-item>
     </context-menu>
 
 ##### [Live Demo](http://aleksandarrodic.com/context-menu/)
