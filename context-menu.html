@@ -60,7 +60,6 @@ Requires nested menu as a sibling
           event.preventDefault();
           event.stopPropagation();
           scope.expanded = false;
-          console.log( 'collapse' );
         };
         this.expand = function(event) {
           event.preventDefault();
@@ -71,7 +70,6 @@ Requires nested menu as a sibling
         };
 
         this.veil = document.querySelector('#nested-menu-veil');
-        console.log( this.veil );
         document.addEventListener('contextmenu', this.expand);
       },
       parentChanged: function() {
