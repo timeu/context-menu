@@ -7,6 +7,7 @@
     grunt.loadNpmTasks('grunt-vulcanize');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-gh-pages');
+    grunt.loadNpmTasks('grunt-remove');
 
     grunt.initConfig({
 
@@ -19,7 +20,7 @@
             }
           },
           files: {
-            'dist/context-menu.html': 'context-menu.html'
+            'vulcanized.html': 'context-menu.html'
           }
         }
       },
@@ -27,6 +28,7 @@
       copy: {
         dist: {
           files: [
+            {src: 'vulcanized.html', dest: 'dist/context-menu.html'},
             {src: 'LICENSE', dest: 'dist/LICENSE'},
             {src: 'README.md', dest: 'dist/README.md'}
           ]
@@ -34,7 +36,7 @@
         demo: {
           files: [
             {src: 'LICENSE', dest: 'demo/LICENSE'},
-            {src: 'dist/context-menu.html', dest: 'demo/context-menu.html'},
+            {src: 'vulcanized.html', dest: 'demo/context-menu.html'},
             {src: 'context-menu-screen-capture.gif', dest: 'demo/context-menu-screen-capture.gif'},
             {src: 'index.html', dest: 'demo/index.html'},
             {src: 'polymer/**', dest: 'demo/'}
@@ -61,19 +63,29 @@
         }
       },
 
+      remove: {
+        clean: {
+          options: {
+            trace: true
+          },
+          fileList: ['vulcanized.html'],
+          dirList: ['dist', 'demo/']
+        } 
+      }
+
     });
 
     grunt.registerTask('dist', [
+      'remove:clean',
       'vulcanize:dist',
       'copy:dist',
       'gh-pages:dist',
       'copy:demo',
-      'gh-pages:demo'
+      'gh-pages:demo',
+      'remove:clean'
     ]);
 
     grunt.registerTask('default', ['dist']);
-
-    grunt.file.mkdir( 'dist' );
 
   };
 
