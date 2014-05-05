@@ -2,7 +2,6 @@
 
 <!--
 Alrternative version of [nested-menu](https://github.com/arodic/nested-menu) element.
-Works exactly like nested menu except its anchored to the context of the parent element.
 
 Requires nested menu as a sibling
 
@@ -14,7 +13,7 @@ Requires nested menu as a sibling
 @url https://github.com/arodic/context-menu
 -->
 
-<polymer-element name="context-menu" attributes="options parent">
+<polymer-element name="context-menu" attributes="options">
   <template>
     <link href="context-menu.css" rel="stylesheet" type="text/css" />
     <nested-menu id="menu" options="{{options}}">
@@ -44,13 +43,6 @@ Requires nested menu as a sibling
        * @type list of objects
        */
 
-      /**
-       * The `parent` (optional attribute) DOM element to attach the mouse/touch listener to.
-       * Default is document
-
-       * @attribute parent
-       * @type DOM object
-       */
       ready: function() {
         var scope = this;
 
@@ -75,11 +67,13 @@ Requires nested menu as a sibling
         };
 
         this.veil = document.querySelector('#nested-menu-veil');
-        document.addEventListener('contextmenu', this.expand);
       },
-      parentChanged: function() {
-        document.removeEventListener('contextmenu', this.expand);
-        this.parent.addEventListener('contextmenu', this.expand);
+      attached: function() {
+        this._parentNode = this.parentNode;
+        this.parentNode.addEventListener('contextmenu', this.expand);
+      },
+      detached: function() {
+        this._parentNode.removeEventListener('contextmenu', this.expand);
       },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
