@@ -4,8 +4,8 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1, maximum-scale=1"/>
   <title>Context Menu</title>
 
-  <script src="../platform/platform.js"></script>
-  <script src="../polymer/polymer.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/polymer/0.2.3/platform.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/polymer/0.2.3/polymer.js"></script>
 
   <link rel="import" href="context-menu.html">
 
@@ -26,22 +26,24 @@
   </style>
 </head>
 <body>
-  <h3><u>Context Menu</u><h3>
-  <h4>Right-click or tap and hold anywhere</h4>
-  <p>
-  <a href="https://github.com/arodic/context-menu/">
-    Documentation and code:<br />https://github.com/arodic/context-menu/
-  </a>
-  </p>
+  
+  
   <context-menu id="context-menu">
-    <menu-item label="HTML Item">
-      <menu-item label="HTML Subitem1" action="console.log" arguments="1"></menu-item>
-      <menu-item label="HTML Subitem2" action="console.log" arguments="2"></menu-item>
-      <menu-item label="HTML Subitem3">
-        <menu-item label="HTML Subitem4"></menu-item>
-      </menu-item>
-    </menu-item>
+    <menu-option label="HTML Item">
+      <menu-option label="HTML Subitem1" action="console.log" arguments="1"></menu-option>
+      <menu-option label="HTML Subitem2" action="alert" arguments="2"></menu-option>
+      <menu-option label="HTML Subitem3">
+        <menu-option label="HTML Subitem4"></menu-option>
+      </menu-option>
+    </menu-option>
   </context-menu>
+
+  <h3><u>Nested Menu</u></h3>
+  <div>
+    <a href="https://github.com/arodic/context-menu/">
+      Documentation and code:<br />https://github.com/arodic/context-menu/
+    </a>
+  </div>
 
   <script type="text/javascript">
     window.addEventListener('polymer-ready', function() {

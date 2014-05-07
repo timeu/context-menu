@@ -1,5 +1,5 @@
 node_modules/
-dist/
-demo/
-.grunt/
+master/
+gh-pages/
+.grunt
 vulcanized.html

@@ -12,7 +12,7 @@
     grunt.initConfig({
 
       vulcanize: {
-        dist: {
+        default: {
           options: {
             inline: true,
             "excludes": {
@@ -26,38 +26,38 @@
       },
  
       copy: {
-        dist: {
+        master: {
           files: [
-            {src: 'vulcanized.html', dest: 'dist/context-menu.html'},
-            {src: 'LICENSE', dest: 'dist/LICENSE'},
-            {src: 'README.md', dest: 'dist/README.md'}
+            {src: 'vulcanized.html', dest: 'master/context-menu.html'},
+            {src: 'LICENSE', dest: 'master/LICENSE'},
+            {src: 'README.md', dest: 'master/README.md'},
+            {src: 'bower.json', dest: 'master/bower.json'},
+            {src: '.bowerrc', dest: 'master/.bowerrc'},
           ]
         },
-        demo: {
+        'gh-pages': {
           files: [
-            {src: 'LICENSE', dest: 'demo/LICENSE'},
-            {src: 'vulcanized.html', dest: 'demo/context-menu.html'},
-            {src: 'context-menu-screen-capture.gif', dest: 'demo/context-menu-screen-capture.gif'},
-            {src: 'index.html', dest: 'demo/index.html'},
-            {src: 'polymer/**', dest: 'demo/'}
+            {src: 'vulcanized.html', dest: 'gh-pages/context-menu.html'},
+            {src: 'LICENSE', dest: 'gh-pages/LICENSE'},
+            {src: 'index.html', dest: 'gh-pages/index.html'},
           ]
         }
       },
 
       'gh-pages': {
-        dist: {
+        master: {
           options: {
-            base: 'dist',
+            base: 'master',
             branch: 'master',
-            message: 'auto-updating master from dev'
+            message: 'auto-updating master from dev with grunt'
           },
-          src: '**/*'
+          src: ['**/*','.bowerrc']
         },
-        demo: {
+        'gh-pages': {
           options: {
-            base: 'demo',
+            base: 'gh-pages',
             branch: 'gh-pages',
-            message: 'auto-updating gh-pages from dev'
+            message: 'auto-updating gh-pages from dev with grunt'
           },
           src: '**/*'
         }
@@ -69,23 +69,20 @@
             trace: true
           },
           fileList: ['vulcanized.html'],
-          dirList: ['dist', 'demo/']
+          dirList: ['master', 'gh-pages']
         } 
       }
 
     });
 
-    grunt.registerTask('dist', [
-      'remove:clean',
-      'vulcanize:dist',
-      'copy:dist',
-      'gh-pages:dist',
-      'copy:demo',
-      'gh-pages:demo',
+    grunt.registerTask('default', [
+      'vulcanize:default',
+      'copy:master',
+      'copy:gh-pages',
+      'gh-pages:master',
+      'gh-pages:gh-pages',
       'remove:clean'
     ]);
-
-    grunt.registerTask('default', ['dist']);
 
   };
 

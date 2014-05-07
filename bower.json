@@ -1,18 +1,24 @@
 {
   "name": "context-menu",
-  "description": "Context Menu",
+  "version": "0.0.2",
   "homepage": "https://github.com/arodic/context-menu",
-  "keywords": [
-    "menu",
-    "context",
-    "ui"
+  "authors": [
+    "Aleksandar Rodic <aleksandar.xyz@gmail.com>"
   ],
-  "author": "Aleksandar Rodic <aleksandar.xyz@gmail.com>",
-  "_source": "git://github.com/arodic/context-menu.git",
-  "_target": "dev",
-  "_originalSource": "arodic/context-menu",
+  "description": "context menu custom component built with polymer.js",
+  "main": "context-menu.html",
+  "keywords": [
+    "context",
+    "menu",
+    "ui",
+    "polymer",
+    "polymerjs",
+    "web-component",
+    "context-menu"
+  ],
+  "license": "Apache 2.0",
   "dependencies": {
     "polymer": "~0.2.3",
-    "nested-menu": "arodic/nested-menu#dev"
+    "nested-menu": "~0.0.3"
   }
 }
