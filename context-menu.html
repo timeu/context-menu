@@ -1,18 +1,4 @@
 <link rel="import" href="../nested-menu/nested-menu.html">
-
-<!--
-Alrternative version of [nested-menu](https://github.com/arodic/nested-menu) element.
-
-Requires nested menu as a sibling
-
-##### [Live Demo](http://aleksandarrodic.com/context-menu/)
-
-@element context-menu
-@blurb Custom element providing a context menu with a simple API
-@status alpha
-@url https://github.com/arodic/context-menu
--->
-
 <polymer-element name="context-menu" attributes="options" assetpath="">
   <template>
     <style type="text/css">:host {
@@ -32,27 +18,6 @@ Requires nested menu as a sibling
   </template>
   <script>
     Polymer('context-menu', {
-
-      /**
-       * The `context-menu-expanded` event fires when the menu is expanded.
-       * 
-       * @event context-menu-expanded
-       */
-
-      /**
-       * The `context-menu-collapsed` event fires when the menu is collapsed.
-       * 
-       * @event context-menu-collapsed
-       */
-
-      /**
-       * The `options` attribute is a list of item objects.
-       * { label: "option", action: function(){}, arguments: [], options: [] }
-
-       * @attribute options
-       * @type list of objects
-       */
-
       ready: function() {
         var scope = this;
 
