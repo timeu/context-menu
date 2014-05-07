@@ -13,7 +13,7 @@
     "ui",
     "polymer",
     "polymerjs",
-    "web-component",
+    "web-components",
     "context-menu"
   ],
   "license": "Apache 2.0",
