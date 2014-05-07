@@ -1,0 +1,18 @@
+{
+  "name": "context-menu",
+  "description": "Context Menu",
+  "homepage": "https://github.com/arodic/context-menu",
+  "keywords": [
+    "menu",
+    "context",
+    "ui"
+  ],
+  "author": "Aleksandar Rodic <aleksandar.xyz@gmail.com>",
+  "_source": "git://github.com/arodic/context-menu.git",
+  "_target": "dev",
+  "_originalSource": "arodic/context-menu",
+  "dependencies": {
+    "polymer": "~0.2.3",
+    "nested-menu": "arodic/nested-menu#dev"
+  }
+}
