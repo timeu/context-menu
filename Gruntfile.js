@@ -33,6 +33,7 @@
             {src: 'README.md', dest: 'master/README.md'},
             {src: 'bower.json', dest: 'master/bower.json'},
             {src: '.bowerrc', dest: 'master/.bowerrc'},
+            {src: '../nested-menu/preview.png', dest: 'master/preview.png'}
           ]
         },
         'gh-pages': {
