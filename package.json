@@ -1,6 +1,6 @@
 {
   "name": "context-menu",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "context menu polymer element",
   "main": "index.js",
   "scripts": {
