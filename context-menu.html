@@ -28,8 +28,10 @@
         this.collapse = function(event) {
           event.preventDefault();
           event.stopPropagation();
-          scope.$.menu.collapseItems();
-          scope.expanded = false;
+          setTimeout(function(){
+            scope.$.menu.collapseItems();
+            scope.expanded = false;
+          },1);
         };
         this.expand = function(event) {
           event.preventDefault();
@@ -50,22 +52,30 @@
       detached: function() {
         this._parentNode.removeEventListener('contextmenu', this.expand);
       },
+      addListeners: function() {
+        this.veil.addEventListener('contextmenu', this.collapse);
+        this.veil.addEventListener('mousedown', this.collapse);
+        this.veil.addEventListener('touchstart', this.collapse);
+        window.addEventListener('scroll', this.collapse);
+        this.addEventListener('nested-menu-action-fired', this.collapse);
+        this._parentNode.removeEventListener('contextmenu', this.expand);
+      },
+      removeListeners: function() {
+        this.veil.removeEventListener('contextmenu', this.collapse);
+        this.veil.removeEventListener('mousedown', this.collapse);
+        this.veil.removeEventListener('touchstart', this.collapse);
+        window.removeEventListener('scroll', this.collapse);
+        this.removeEventListener('nested-menu-action-fired', this.collapse);
+        this._parentNode.addEventListener('contextmenu', this.expand);
+      },
       expandedChanged: function() {
         this.classList.toggle('expanded', this.expanded);
         this.veil.classList.toggle('visible', this.expanded);
         if (this.expanded) {
-          this.veil.addEventListener('mousedown', this.collapse);
-          this.veil.addEventListener('touchstart', this.collapse);
-          window.addEventListener('scroll', this.collapse);
-          this.addEventListener('nested-menu-action-fired', this.collapse);
-
+          this.addListeners();
           this.fire('context-menu-expanded', this);
         } else {
-          this.veil.removeEventListener('mousedown', this.collapse);
-          this.veil.removeEventListener('touchstart', this.collapse);
-          window.removeEventListener('scroll', this.collapse);
-          this.removeEventListener('nested-menu-action-fired', this.collapse);
-
+          this.removeListeners();
           this.fire('context-menu-collapsed', this);
         }
       }
